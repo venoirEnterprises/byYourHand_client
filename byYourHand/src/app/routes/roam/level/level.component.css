@@ -2,16 +2,13 @@
     position:absolute;
 }
 
-.floor {    
-    top:128px;
-    left:64px;
-    width:64px;
+.floor {        
     border-bottom: 2px solid black;
 }
 
 .enemy {
     top:96px;
-    left:224px;
+    left:160px;
     width:32px;
     height:32px;
     background-color:blue;
