@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Enemy } from './enemy.dto';
 import { Floor } from './floor.dto';
 import { Player } from './level/player.dto';
+import { Level } from './level.dto';
 
 @Injectable({
     providedIn: 'root'
@@ -10,6 +11,7 @@ export class RoamService {
     // Will call service with a level ID in the end, boolean to switch, to make dev easier?
     enemies: Enemy[] = [];
     floors: Floor[] = [];
+    level: Level;
     constructor() { }
 
     public getEnemies(): Enemy[] {
@@ -27,5 +29,10 @@ export class RoamService {
             id: "timeToJump", x: 6, y: 6, width: 4, height: 0, breakable: false, falling: false
         });
         return this.floors;
+    }
+
+    public getLevel(): Level {
+        this.level = { startX: 1, startY: 4 }
+        return this.level;
     }
 }

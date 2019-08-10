@@ -47,13 +47,12 @@ export class LevelComponent implements OnInit {
 
     @HostListener('document:keyup', ['$event'])
     onKeyUp(ev: KeyboardEvent) {
-      // do something meaningful with it
+        // do something meaningful with it
         this.respondToKeyPress(ev);
     }
 
     public respondToKeyPress(ev: KeyboardEvent): void {
-        switch (ev.keyCode)
-        {
+        switch (ev.keyCode) {
             case this.player.keyMoveLeft:
                 console.log("LEFT");
                 break;
@@ -64,9 +63,16 @@ export class LevelComponent implements OnInit {
     }
 
     public setSafeFloorsForLevel(): void {
-        for (let floor of this.floors)
-        {
-            this.safeFloors[floor.x][floor.y] = true;
+        for (let floor of this.floors) {
+            if (floor.width > 1) {
+                for (var i = floor.x; i < floor.x + floor.width; i++) {
+                    console.log(`separate values for width on ${floor.id}, with key ${i}`);
+                    this.safeFloors[floor.y][i] = true;
+                }
+            }
+            else {
+                this.safeFloors[floor.y][floor.x] = true;
+            }
         }
     }
 
@@ -98,6 +104,6 @@ export class LevelComponent implements OnInit {
 
     public convertDBValueToDisplayValue(dbValue: number): String {
         dbValue *= 32;
-        return dbValue.toString()+"px";
+        return dbValue.toString() + "px";
     }
 }
