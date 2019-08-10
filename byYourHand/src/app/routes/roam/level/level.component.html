@@ -1,7 +1,5 @@
-<div *ngFor="let enemy of enemies" id="enemy_{{enemy.id}}" class="enemy levelObject" [ngStyle]="{'top': enemy.y*32&'px'}">
+<div *ngFor="let displayLevelObject of displayLevelObjects" id="{{displayLevelObject.type}}_{{displayLevelObject.id}}" class="{{displayLevelObject.type}} levelObject" [ngStyle]="{'top': displayLevelObject.y, 'left': displayLevelObject.x, 'width': displayLevelObject.width, 'height': displayLevelObject.height}">
 </div>
-
-<hr *ngFor="let floor of floors" id="floor_{{floor.id}}" class="floor levelObject">
 
 <!-- 
 <div class="floor levelObject" style="top:128px;left:64px;width:64px;"></div>

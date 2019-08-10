@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { Enemy } from './enemy.dto';
-import { Floor } from './floor.dto';
+import { Enemy } from '../enemy.dto';
+import { Floor } from '../floor.dto';
+import { DisplayLevelObject } from '../displayLevelObject.dto';
+import { RoamService } from '../roam.service';
 
 @Component({
     selector: 'app-level',
@@ -9,24 +11,38 @@ import { Floor } from './floor.dto';
 })
 export class LevelComponent implements OnInit {
 
-    levelObjects = ["1", "2"];
+    displayLevelObjects: DisplayLevelObject[] = [];
     enemies: Enemy[] = [];
     floors: Floor[] = [];
-    constructor() { }
-
-    ngOnInit() {
-        this.enemies.push({
-            id: "firstBaddie", x: 5, y: 3, width: 1, height: 5, fly: true, damage: 10, health: 100, moveY: 5, moveX: 0
-        });
-        this.floors.push({
-            id: "startingFloor", x: 2, y: 4, width: 2, height: 0, breakable: false, falling: false
-        })
-        this.floors.push({
-            id: "timeToJump", x: 2, y: 4, width: 2, height: 0, breakable: false, falling: false
-        });
-        console.log(this.enemies);
-        console.log(this.floors);
-        // service endpoints in the end
+    roamService: RoamService;
+    constructor() {
+        this.roamService = new RoamService();
     }
 
+    ngOnInit() {
+        this.enemies = this.roamService.getEnemies();
+        this.floors = this.roamService.getFloors();
+        console.log(this.enemies);
+        console.log(this.floors);
+        this.pushObjectsToGamePage(this.enemies, "enemy");
+        this.pushObjectsToGamePage(this.floors, "floor");
+    }
+
+    public pushObjectsToGamePage(loop = [], type: String): void {
+        for (let obj of loop) {
+            this.displayLevelObjects.push({
+                x: this.convertDBValueToDisplayValue(obj.x),
+                y: this.convertDBValueToDisplayValue(obj.y),
+                width: this.convertDBValueToDisplayValue(obj.width),
+                height: this.convertDBValueToDisplayValue(obj.height),
+                type: type,
+                id: obj.id
+            });
+        }
+    }
+
+    public convertDBValueToDisplayValue(dbValue: number): String {
+        dbValue *= 32;
+        return dbValue.toString()+"px";
+    }
 }
