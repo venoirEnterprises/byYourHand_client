@@ -16,17 +16,17 @@ export class RoamService {
 
     public getEnemies(): Enemy[] {
         this.enemies.push({
-            id: "firstBaddie", x: 5, y: 3, width: 1, height: 1, fly: true, damage: 10, health: 100, moveY: 5, moveX: 0
+            id: "firstBaddie", x: 5, y: 3, width: 1, height: 1, fly: true, damage: 10, health: 100, moveY: 5, moveX: 0, indexInDisplay: -1
         });
         return this.enemies;
     }
 
     public getFloors(): Floor[] {
         this.floors.push({
-            id: "startingFloor", x: 2, y: 4, width: 2, height: 0, breakable: false, falling: false
+            id: "startingFloor", x: 2, y: 4, width: 2, height: 0, breakable: false, falling: false, indexInDisplay: -1
         })
         this.floors.push({
-            id: "timeToJump", x: 6, y: 6, width: 4, height: 0, breakable: false, falling: false
+            id: "timeToJump", x: 6, y: 6, width: 4, height: 0, breakable: false, falling: false, indexInDisplay: -1
         });
         return this.floors;
     }

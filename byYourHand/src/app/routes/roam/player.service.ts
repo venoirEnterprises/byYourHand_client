@@ -9,8 +9,12 @@ export class PlayerService {
     player: Player;
     constructor() { }
 
-    public getPlayer(): Player {
-        this.player = { keyMoveLeft: 65, keyMoveRight: 68, name: "firstPlayer", health: 100, movePerPress: 32, builder: false };
+    public getPlayer(levelStartX: number, levelStartY: number): Player {
+        this.player = {
+            x: levelStartX+1, y: levelStartY-2, width: 1, height: 2,
+            keyMoveLeft: 65, keyMoveRight: 68,
+            id: "idignored", indexInDisplay: -1, name: "firstPlayer", health: 100, movePerPress: 1, builder: false
+        };
         return this.player;
     }
 }

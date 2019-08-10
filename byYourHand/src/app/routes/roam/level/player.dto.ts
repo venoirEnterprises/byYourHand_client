@@ -1,4 +1,6 @@
-export class Player {
+import { LevelObject } from "../levelObject.dto";
+
+export class Player extends LevelObject {
     keyMoveLeft: number;
     keyMoveRight: number;
     name: String;
