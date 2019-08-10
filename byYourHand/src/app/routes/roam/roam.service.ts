@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Enemy } from './enemy.dto';
 import { Floor } from './floor.dto';
+import { Player } from './level/player.dto';
 
 @Injectable({
     providedIn: 'root'
