@@ -59,11 +59,9 @@ export class LevelComponent implements OnInit {
     public respondToKeyPress(ev: KeyboardEvent): void {
         switch (ev.keyCode) {
             case this.player.keyMoveLeft:
-                console.log("LEFT");
                 this.player.x -= 1;
                 break;
             case this.player.keyMoveRight:
-                console.log("RIGHT");
                 this.player.x += 1;
                 break;
         }
