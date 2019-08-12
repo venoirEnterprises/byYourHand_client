@@ -65,11 +65,11 @@ export class LevelComponent implements OnInit {
         let activeKeyPressed = true;
         switch (ev.keyCode) {
             case this.player.keyMoveLeft:
-                this.player.x -= 1;
+                this.player.x -= .5;
                 this.directionDebug = "left";
                 break;
             case this.player.keyMoveRight:
-                this.player.x += 1;
+                this.player.x += .5;
                 this.directionDebug = "right";
                 break;
             default:
@@ -90,6 +90,8 @@ export class LevelComponent implements OnInit {
         const leftFloorSafe = this.safeFloors[playerBottom][playerX][0];
         const rightFloorSafe = this.safeFloors[playerBottom][playerX + (this.player.width * 2)][0];
 
+        console.log(`the player is at x:${playerX} and y:${playerBottom} the right side being:${playerX + (this.player.width * 2)}`)
+        console.log('playerThis', this.player);
         let floorExistsBelow = false;
         for (var i = playerBottom + 1; i <= this.safeFloors.length - 1; i++) {
             if (this.safeFloors[i][playerX][0])
@@ -100,8 +102,8 @@ export class LevelComponent implements OnInit {
         }
 
         const playerFloorStatus = leftFloorSafe && middleFloorSafe && rightFloorSafe ? PlayerFloorStatus.floorSafe :
-            !leftFloorSafe && !middleFloorSafe && rightFloorSafe ? PlayerFloorStatus.floorRightEdge :
-                leftFloorSafe && !middleFloorSafe && !rightFloorSafe ? PlayerFloorStatus.floorLeftEdge :
+            (!leftFloorSafe && middleFloorSafe && rightFloorSafe) || (!leftFloorSafe && !middleFloorSafe && rightFloorSafe) ? PlayerFloorStatus.floorLeftEdge :
+                (leftFloorSafe && middleFloorSafe && !rightFloorSafe) || (leftFloorSafe && !middleFloorSafe && !rightFloorSafe) ? PlayerFloorStatus.floorRightEdge :
                     floorExistsBelow ? PlayerFloorStatus.floorDown : PlayerFloorStatus.nofloor;
 
         this.playerFloorStatusDebug = playerFloorStatus;
