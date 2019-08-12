@@ -16,6 +16,10 @@ import { PlayerFloorStatus } from '../playerFloorStatus.dto';
 })
 export class LevelComponent implements OnInit {
 
+    playerFloorStatusDebug: String;
+    directionDebug: String = "";
+    playerOnFloorDebug: boolean;
+    // Debug end
     playerFloorStatus: PlayerFloorStatus = PlayerFloorStatus.floorSafe;
     // Run-time player status compared to the floor
     displayLevelObjects: DisplayLevelObject[] = [];
@@ -49,6 +53,7 @@ export class LevelComponent implements OnInit {
         this.pushObjectsToGamePage(this.enemies, "enemy");
         this.pushObjectsToGamePage(this.floors, "floor");
         this.player.indexInDisplay = this.pushObjectToGamePage(this.player, "player");
+        this.playerOnFloorDebug = this.isPlayerOnFloor()
     }
 
     @HostListener('document:keydown', ['$event'])
@@ -61,9 +66,11 @@ export class LevelComponent implements OnInit {
         switch (ev.keyCode) {
             case this.player.keyMoveLeft:
                 this.player.x -= 1;
+                this.directionDebug = "left";
                 break;
             case this.player.keyMoveRight:
                 this.player.x += 1;
+                this.directionDebug = "right";
                 break;
             default:
                 activeKeyPressed = false;
@@ -71,6 +78,7 @@ export class LevelComponent implements OnInit {
         }
         if (activeKeyPressed) {
             this.updatePlayerDisplayObject(this.player.indexInDisplay, this.player);
+            this.playerOnFloorDebug = this.isPlayerOnFloor();
         }
     }
 
@@ -94,6 +102,7 @@ export class LevelComponent implements OnInit {
                 leftFloorSafe && !middleFloorSafe && !rightFloorSafe ? PlayerFloorStatus.floorLeftEdge :
                     floorExistsBelow ? PlayerFloorStatus.floorDown :  PlayerFloorStatus.nofloor;
 
+        this.playerFloorStatusDebug = playerFloorStatus;
         this.playerFloorStatus = playerFloorStatus;
 
         if (floorExistsBelow)
