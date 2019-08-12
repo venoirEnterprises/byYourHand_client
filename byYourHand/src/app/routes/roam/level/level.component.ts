@@ -116,7 +116,8 @@ export class LevelComponent implements OnInit {
             floor.y *= 2;
             // This gets doubled from 1 to 2, as the floors use 16 in the array, compared to 32 for the player
             if (floor.width > 1) {
-                for (var i = floor.x; i < floor.x + floor.width; i++) {
+                for (var i = floor.x - 1; i < floor.x + floor.width + 1; i++) {
+                    // Add a 16px buffer either side to have "hanging edges"
                     this.safeFloors[floor.y][i] = true;
                 }
             }
@@ -188,11 +189,13 @@ export class LevelComponent implements OnInit {
 
     public pushObjectToGamePage(obj: any, type: String): number {
         const halfPxDetection = type.toLowerCase() === "floor";
+        const xModifier = halfPxDetection ? obj.x - 0.5 : obj.x;
+        const widthModifier = halfPxDetection ? obj.width + 1 : obj.width;
         // Visual display of overhang as in setSafeFloorsForLevel
         this.displayLevelObjects.push({
-            x: this.convertDBValueToDisplayValue(obj.x, halfPxDetection),
+            x: this.convertDBValueToDisplayValue(xModifier, halfPxDetection),
             y: this.convertDBValueToDisplayValue(obj.y, halfPxDetection),
-            width: this.convertDBValueToDisplayValue(obj.width, halfPxDetection),
+            width: this.convertDBValueToDisplayValue(widthModifier, halfPxDetection),
             height: this.convertDBValueToDisplayValue(obj.height, halfPxDetection),
             type: type,
             id: obj.id
