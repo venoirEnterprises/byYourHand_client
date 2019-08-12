@@ -23,11 +23,14 @@ export class RoamService {
 
     public getFloors(): Floor[] {
         this.floors.push({
-            id: "startingFloor", x: 2, y: 4, width: 2, height: 0, breakable: false, falling: false, indexInDisplay: -1
-        })
-        this.floors.push({
-            id: "timeToJump", x: 6, y: 6, width: 4, height: 0, breakable: false, falling: false, indexInDisplay: -1
+            id: "startingFloor", x: 1, y: 4, width: 2, height: 0, breakable: false, falling: false, indexInDisplay: -1
         });
+        this.floors.push({
+            id: "timeToJump", x: 6, y: 6, width: 2, height: 0, breakable: false, falling: false, indexInDisplay: -1
+        });
+        this.floors.push({
+            id: "checkBelow", x: 3, y: 9, width: 1, height: 0, breakable: false, falling: false, indexInDisplay: -1
+        })
         return this.floors;
     }
 

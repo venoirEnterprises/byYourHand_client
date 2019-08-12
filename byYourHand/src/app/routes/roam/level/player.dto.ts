@@ -1,4 +1,5 @@
 import { LevelObject } from "../levelObject.dto";
+import { PlayerFloorStatus } from "../playerFloorStatus.dto";
 
 export class Player extends LevelObject {
     keyMoveLeft: number;

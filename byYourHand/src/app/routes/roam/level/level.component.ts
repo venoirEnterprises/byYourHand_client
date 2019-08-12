@@ -7,6 +7,7 @@ import { PlayerKeyBoard } from '../playerKeyboard.dto';
 import { Player } from './player.dto';
 import { PlayerService } from '../player.service';
 import { Level } from '../level.dto';
+import { PlayerFloorStatus } from '../playerFloorStatus.dto';
 
 @Component({
     selector: 'app-level',
@@ -15,6 +16,8 @@ import { Level } from '../level.dto';
 })
 export class LevelComponent implements OnInit {
 
+    playerFloorStatus: PlayerFloorStatus = PlayerFloorStatus.floorSafe;
+    // Run-time player status compared to the floor
     displayLevelObjects: DisplayLevelObject[] = [];
     enemies: Enemy[] = [];
     floors: Floor[] = [];
@@ -39,24 +42,22 @@ export class LevelComponent implements OnInit {
         // floors begin
         this.safeFloors = this.setUpLevelArray();
         this.setSafeFloorsForLevel();
-
-        console.log(this.floors);
-        console.log(this.safeFloors);
+        console.log("thisSafeFloors", this.safeFloors);
+        console.log("thisFloors", this.floors);
 
         // physically display objects
         this.pushObjectsToGamePage(this.enemies, "enemy");
         this.pushObjectsToGamePage(this.floors, "floor");
         this.player.indexInDisplay = this.pushObjectToGamePage(this.player, "player");
-        console.log(this.displayLevelObjects);
     }
 
     @HostListener('document:keydown', ['$event'])
     onKeyDown(ev: KeyboardEvent) {
-        // do something meaningful with it
         this.respondToKeyPress(ev);
     }
 
     public respondToKeyPress(ev: KeyboardEvent): void {
+        let activeKeyPressed = true;
         switch (ev.keyCode) {
             case this.player.keyMoveLeft:
                 this.player.x -= 1;
@@ -64,12 +65,56 @@ export class LevelComponent implements OnInit {
             case this.player.keyMoveRight:
                 this.player.x += 1;
                 break;
+            default:
+                activeKeyPressed = false;
+                break;
         }
-        this.updatePlayerDisplayObject(this.player.indexInDisplay, this.player);
+        if (activeKeyPressed) {
+            this.updatePlayerDisplayObject(this.player.indexInDisplay, this.player);
+        }
     }
 
+    public isPlayerOnFloor(): boolean {
+
+        const playerBottom: number = (this.player.y + this.player.height) * 2;
+        const middleFloorSafe = this.safeFloors[playerBottom][(this.player.x * 2) + 1];
+        const leftFloorSafe = this.safeFloors[playerBottom][this.player.x * 2];
+        const rightFloorSafe = this.safeFloors[playerBottom][(this.player.x * 2) + (this.player.width * 2)];
+
+        let floorExistsBelow = false;
+        for (var i = playerBottom+1; i <= this.safeFloors.length-1; i++){
+            if (this.safeFloors[i][this.player.x * 2])
+            {
+                floorExistsBelow = true;
+            }
+        }
+
+        const playerFloorStatus = leftFloorSafe && middleFloorSafe && rightFloorSafe ? PlayerFloorStatus.floorSafe :
+        !leftFloorSafe && !middleFloorSafe && rightFloorSafe  ? PlayerFloorStatus.floorRightEdge :
+                leftFloorSafe && !middleFloorSafe && !rightFloorSafe ? PlayerFloorStatus.floorLeftEdge :
+                    floorExistsBelow ? PlayerFloorStatus.floorDown :  PlayerFloorStatus.nofloor;
+
+        this.playerFloorStatus = playerFloorStatus;
+
+        if (floorExistsBelow)
+        {
+            return true;
+        }
+        else if (!leftFloorSafe && !middleFloorSafe && !rightFloorSafe)
+        {
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
     public setSafeFloorsForLevel(): void {
         for (let floor of this.floors) {
+            floor.width *= 2;
+            floor.height *= 2;
+            floor.x *= 2;
+            floor.y *= 2;
+            // This gets doubled from 1 to 2, as the floors use 16 in the array, compared to 32 for the player
             if (floor.width > 1) {
                 for (var i = floor.x; i < floor.x + floor.width; i++) {
                     this.safeFloors[floor.y][i] = true;
@@ -83,20 +128,56 @@ export class LevelComponent implements OnInit {
 
     public setUpLevelArray(): boolean[][] {
         return [
-            [false, false, false, false, false, false, false, false, false, false, false],
-            [false, false, false, false, false, false, false, false, false, false, false],
-            [false, false, false, false, false, false, false, false, false, false, false],
-            [false, false, false, false, false, false, false, false, false, false, false],
-            [false, false, false, false, false, false, false, false, false, false, false],
-            [false, false, false, false, false, false, false, false, false, false, false],
-            [false, false, false, false, false, false, false, false, false, false, false],
-            [false, false, false, false, false, false, false, false, false, false, false]
+            [false, false, false, false, false, false, false, false, false, false, false,
+                false, false, false, false, false, false, false, false, false, false, false],
+            [false, false, false, false, false, false, false, false, false, false, false,
+                false, false, false, false, false, false, false, false, false, false, false],
+            [false, false, false, false, false, false, false, false, false, false, false,
+                false, false, false, false, false, false, false, false, false, false, false],
+            [false, false, false, false, false, false, false, false, false, false, false,
+                false, false, false, false, false, false, false, false, false, false, false],
+            [false, false, false, false, false, false, false, false, false, false, false,
+                false, false, false, false, false, false, false, false, false, false, false],
+            [false, false, false, false, false, false, false, false, false, false, false,
+                false, false, false, false, false, false, false, false, false, false, false],
+            [false, false, false, false, false, false, false, false, false, false, false,
+                false, false, false, false, false, false, false, false, false, false, false],
+            [false, false, false, false, false, false, false, false, false, false, false,
+                false, false, false, false, false, false, false, false, false, false, false],
+            [false, false, false, false, false, false, false, false, false, false, false,
+                false, false, false, false, false, false, false, false, false, false, false],
+            [false, false, false, false, false, false, false, false, false, false, false,
+                false, false, false, false, false, false, false, false, false, false, false],
+            [false, false, false, false, false, false, false, false, false, false, false,
+                false, false, false, false, false, false, false, false, false, false, false],
+            [false, false, false, false, false, false, false, false, false, false, false,
+                false, false, false, false, false, false, false, false, false, false, false],
+            [false, false, false, false, false, false, false, false, false, false, false,
+                false, false, false, false, false, false, false, false, false, false, false],
+            [false, false, false, false, false, false, false, false, false, false, false,
+                false, false, false, false, false, false, false, false, false, false, false],
+            [false, false, false, false, false, false, false, false, false, false, false,
+                false, false, false, false, false, false, false, false, false, false, false],
+            [false, false, false, false, false, false, false, false, false, false, false,
+                false, false, false, false, false, false, false, false, false, false, false],
+            [false, false, false, false, false, false, false, false, false, false, false,
+                false, false, false, false, false, false, false, false, false, false, false],
+            [false, false, false, false, false, false, false, false, false, false, false,
+                false, false, false, false, false, false, false, false, false, false, false],
+            [false, false, false, false, false, false, false, false, false, false, false,
+                false, false, false, false, false, false, false, false, false, false, false],
+            [false, false, false, false, false, false, false, false, false, false, false,
+                false, false, false, false, false, false, false, false, false, false, false],
+            [false, false, false, false, false, false, false, false, false, false, false,
+                false, false, false, false, false, false, false, false, false, false, false],
+            [false, false, false, false, false, false, false, false, false, false, false,
+                false, false, false, false, false, false, false, false, false, false, false]
         ]
     }
 
-    public updatePlayerDisplayObject(index: number, player: Player ): void {
-        this.displayLevelObjects[index].x = this.convertDBValueToDisplayValue(player.x);
-        this.displayLevelObjects[index].y = this.convertDBValueToDisplayValue(player.y);
+    public updatePlayerDisplayObject(index: number, player: Player): void {
+        this.displayLevelObjects[index].x = this.convertDBValueToDisplayValue(player.x, false);
+        this.displayLevelObjects[index].y = this.convertDBValueToDisplayValue(player.y, false);
     }
 
     public pushObjectsToGamePage(loop = [], type: String): void {
@@ -106,11 +187,13 @@ export class LevelComponent implements OnInit {
     }
 
     public pushObjectToGamePage(obj: any, type: String): number {
+        const halfPxDetection = type.toLowerCase() === "floor";
+        // Visual display of overhang as in setSafeFloorsForLevel
         this.displayLevelObjects.push({
-            x: this.convertDBValueToDisplayValue(obj.x),
-            y: this.convertDBValueToDisplayValue(obj.y),
-            width: this.convertDBValueToDisplayValue(obj.width),
-            height: this.convertDBValueToDisplayValue(obj.height),
+            x: this.convertDBValueToDisplayValue(obj.x, halfPxDetection),
+            y: this.convertDBValueToDisplayValue(obj.y, halfPxDetection),
+            width: this.convertDBValueToDisplayValue(obj.width, halfPxDetection),
+            height: this.convertDBValueToDisplayValue(obj.height, halfPxDetection),
             type: type,
             id: obj.id
         });
@@ -118,8 +201,9 @@ export class LevelComponent implements OnInit {
         // Deletion will have to take away 1 from all items that are higher than what's being deleted, but coming soon...
     }
 
-    public convertDBValueToDisplayValue(dbValue: number): String {
-        dbValue *= 32;
+    public convertDBValueToDisplayValue(dbValue: number, halfPxDetection: boolean): String {
+        const multiplier: number = halfPxDetection ? 16 : 32;
+        dbValue *= multiplier;
         return dbValue.toString() + "px";
     }
 }
