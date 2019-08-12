@@ -85,13 +85,15 @@ export class LevelComponent implements OnInit {
     public isPlayerOnFloor(): boolean {
 
         const playerBottom: number = (this.player.y + this.player.height) * 2;
-        const middleFloorSafe = this.safeFloors[playerBottom][(this.player.x * 2) + 1];
-        const leftFloorSafe = this.safeFloors[playerBottom][this.player.x * 2];
-        const rightFloorSafe = this.safeFloors[playerBottom][(this.player.x * 2) + (this.player.width * 2)];
+        const playerX: number = this.player.x * 2;
+        const middleFloorSafe = this.safeFloors[playerBottom][playerX + 1];
+        const leftFloorSafe = this.safeFloors[playerBottom][playerX];
+        const rightFloorSafe = this.safeFloors[playerBottom][playerX + (this.player.width * 2)];
 
         let floorExistsBelow = false;
         for (var i = playerBottom+1; i <= this.safeFloors.length-1; i++){
-            if (this.safeFloors[i][this.player.x * 2])
+            if (this.safeFloors[i][playerX])
+            // Check the middle has a match, can fall into edges of floors below in the end
             {
                 floorExistsBelow = true;
             }
