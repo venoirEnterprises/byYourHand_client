@@ -27,7 +27,7 @@ export class LevelComponent implements OnInit {
     floors: Floor[] = [];
     roamService: RoamService;
     playerService: PlayerService;
-    safeFloors: boolean[][];
+    safeFloors: boolean[][][];
     level: Level;
     player: Player;
     playerNavigationKeys: PlayerKeyBoard[];
@@ -41,7 +41,7 @@ export class LevelComponent implements OnInit {
         this.enemies = this.roamService.getEnemies();
         this.floors = this.roamService.getFloors();
         this.level = this.roamService.getLevel();
-        this.player = this.playerService.getPlayer(this.level.startX, this.level.startY);
+        this.player = this.playerService.getPlayer(this.level.startX, this.level.startY, this.level.startZ);
 
         // floors begin
         this.safeFloors = this.setUpLevelArray();
@@ -86,13 +86,13 @@ export class LevelComponent implements OnInit {
 
         const playerBottom: number = (this.player.y + this.player.height) * 2;
         const playerX: number = this.player.x * 2;
-        const middleFloorSafe = this.safeFloors[playerBottom][playerX + 1];
-        const leftFloorSafe = this.safeFloors[playerBottom][playerX];
-        const rightFloorSafe = this.safeFloors[playerBottom][playerX + (this.player.width * 2)];
+        const middleFloorSafe = this.safeFloors[playerBottom][playerX + 1][0];
+        const leftFloorSafe = this.safeFloors[playerBottom][playerX][0];
+        const rightFloorSafe = this.safeFloors[playerBottom][playerX + (this.player.width * 2)][0];
 
         let floorExistsBelow = false;
-        for (var i = playerBottom+1; i <= this.safeFloors.length-1; i++){
-            if (this.safeFloors[i][playerX])
+        for (var i = playerBottom + 1; i <= this.safeFloors.length - 1; i++) {
+            if (this.safeFloors[i][playerX][0])
             // Check the middle has a match, can fall into edges of floors below in the end
             {
                 floorExistsBelow = true;
@@ -100,19 +100,17 @@ export class LevelComponent implements OnInit {
         }
 
         const playerFloorStatus = leftFloorSafe && middleFloorSafe && rightFloorSafe ? PlayerFloorStatus.floorSafe :
-        !leftFloorSafe && !middleFloorSafe && rightFloorSafe  ? PlayerFloorStatus.floorRightEdge :
+            !leftFloorSafe && !middleFloorSafe && rightFloorSafe ? PlayerFloorStatus.floorRightEdge :
                 leftFloorSafe && !middleFloorSafe && !rightFloorSafe ? PlayerFloorStatus.floorLeftEdge :
-                    floorExistsBelow ? PlayerFloorStatus.floorDown :  PlayerFloorStatus.nofloor;
+                    floorExistsBelow ? PlayerFloorStatus.floorDown : PlayerFloorStatus.nofloor;
 
         this.playerFloorStatusDebug = playerFloorStatus;
         this.playerFloorStatus = playerFloorStatus;
 
-        if (floorExistsBelow)
-        {
+        if (floorExistsBelow) {
             return true;
         }
-        else if (!leftFloorSafe && !middleFloorSafe && !rightFloorSafe)
-        {
+        else if (!leftFloorSafe && !middleFloorSafe && !rightFloorSafe) {
             return false;
         }
         else {
@@ -129,61 +127,164 @@ export class LevelComponent implements OnInit {
             if (floor.width > 1) {
                 for (var i = floor.x - 1; i < floor.x + floor.width + 1; i++) {
                     // Add a 16px buffer either side to have "hanging edges"
-                    this.safeFloors[floor.y][i] = true;
+                    this.safeFloors[floor.y][i][0] = true;
                 }
             }
             else {
-                this.safeFloors[floor.y][floor.x] = true;
+                this.safeFloors[floor.y][floor.x][0] = true;
             }
         }
     }
 
-    public setUpLevelArray(): boolean[][] {
+    public setUpLevelArray(): boolean[][][] {
         return [
-            [false, false, false, false, false, false, false, false, false, false, false,
-                false, false, false, false, false, false, false, false, false, false, false],
-            [false, false, false, false, false, false, false, false, false, false, false,
-                false, false, false, false, false, false, false, false, false, false, false],
-            [false, false, false, false, false, false, false, false, false, false, false,
-                false, false, false, false, false, false, false, false, false, false, false],
-            [false, false, false, false, false, false, false, false, false, false, false,
-                false, false, false, false, false, false, false, false, false, false, false],
-            [false, false, false, false, false, false, false, false, false, false, false,
-                false, false, false, false, false, false, false, false, false, false, false],
-            [false, false, false, false, false, false, false, false, false, false, false,
-                false, false, false, false, false, false, false, false, false, false, false],
-            [false, false, false, false, false, false, false, false, false, false, false,
-                false, false, false, false, false, false, false, false, false, false, false],
-            [false, false, false, false, false, false, false, false, false, false, false,
-                false, false, false, false, false, false, false, false, false, false, false],
-            [false, false, false, false, false, false, false, false, false, false, false,
-                false, false, false, false, false, false, false, false, false, false, false],
-            [false, false, false, false, false, false, false, false, false, false, false,
-                false, false, false, false, false, false, false, false, false, false, false],
-            [false, false, false, false, false, false, false, false, false, false, false,
-                false, false, false, false, false, false, false, false, false, false, false],
-            [false, false, false, false, false, false, false, false, false, false, false,
-                false, false, false, false, false, false, false, false, false, false, false],
-            [false, false, false, false, false, false, false, false, false, false, false,
-                false, false, false, false, false, false, false, false, false, false, false],
-            [false, false, false, false, false, false, false, false, false, false, false,
-                false, false, false, false, false, false, false, false, false, false, false],
-            [false, false, false, false, false, false, false, false, false, false, false,
-                false, false, false, false, false, false, false, false, false, false, false],
-            [false, false, false, false, false, false, false, false, false, false, false,
-                false, false, false, false, false, false, false, false, false, false, false],
-            [false, false, false, false, false, false, false, false, false, false, false,
-                false, false, false, false, false, false, false, false, false, false, false],
-            [false, false, false, false, false, false, false, false, false, false, false,
-                false, false, false, false, false, false, false, false, false, false, false],
-            [false, false, false, false, false, false, false, false, false, false, false,
-                false, false, false, false, false, false, false, false, false, false, false],
-            [false, false, false, false, false, false, false, false, false, false, false,
-                false, false, false, false, false, false, false, false, false, false, false],
-            [false, false, false, false, false, false, false, false, false, false, false,
-                false, false, false, false, false, false, false, false, false, false, false],
-            [false, false, false, false, false, false, false, false, false, false, false,
-                false, false, false, false, false, false, false, false, false, false, false]
+            [
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false]
+            ],
+            [
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false]
+            ],
+            [
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false]
+            ],
+            [
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false]
+            ],
+            [
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false]
+            ],
+            [
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false]
+            ],
+            [
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false]
+            ],
+            [
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false]
+            ],
+            [
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false]
+            ],
+            [
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false]
+            ],
+            [
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false]
+            ],
+            [
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false]
+            ],
+            [
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false]
+            ],
+            [
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false]
+            ],
+            [
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false]
+            ],
+            [
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false]
+            ],
+            [
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false]
+            ],
+            [
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false]
+            ],
+            [
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false]
+            ],
+            [
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false]
+            ],
+            [
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false], [false, false], [false, false], [false, false],
+                [false, false], [false, false]
+            ]
         ]
     }
 
