@@ -62,7 +62,7 @@ export class LevelComponent implements OnInit {
         // physically display objects
         this.canvasService.pushObjectsToGamePage(this.enemies, "enemy");
         this.canvasService.pushObjectsToGamePage(this.floors, "floor");
-        this.player.indexInDisplay = this.canvasService.pushObjectToGamePage(this.player, "player");
+        this.canvasService.pushObjectToGamePage(this.player, "player");
         this.playerOnFloorDebug = this.isPlayerOnFloor()
     }
 
@@ -97,7 +97,8 @@ export class LevelComponent implements OnInit {
                 break;
         }
         if (activeKeyPressed) {
-            this.canvasService.updatePlayerDisplayObject(this.player.indexInDisplay, this.player);
+            // this.canvasService.updatePlayerDisplayObject(this.player);
+            // need to redraw the canvas each time, which could loop on display objects, or just be rendered from the call each time?
             this.playerOnFloorDebug = this.isPlayerOnFloor();
         }
     }

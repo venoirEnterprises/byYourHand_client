@@ -11,6 +11,4 @@ export class LevelObject {
     height: number;
     depth: number;
     // in design and physical terms [*32 again]
-    indexInDisplay: number;
-    // To update an object on movement / destruction;
 }

@@ -11,7 +11,7 @@ export class PlayerService {
 
     public getPlayer(levelStartX: number, levelStartY: number, levelStartZ: number): Player {
         this.player = {
-            x: levelStartX+1, y: levelStartY-2, z: levelStartZ, width: 1, height: 2, depth: 0, keyMoveLeft: 65, keyMoveRight: 68, id: "idignored", indexInDisplay: -1, name: "firstPlayer", health: 100, movePerPress: 1, builder: false
+            x: levelStartX+1, y: levelStartY-2, z: levelStartZ, width: 1, height: 2, depth: 0, keyMoveLeft: 65, keyMoveRight: 68, id: "idignored", name: "firstPlayer", health: 100, movePerPress: 1, builder: false
         };
         return this.player;
     }

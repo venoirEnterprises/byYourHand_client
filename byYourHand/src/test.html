@@ -56,6 +56,7 @@ var diffBackPerPixelRight2 = (horizonX - endX2)/(horizonY - startY2);
 
 var depth2 = 60;
 
+
 ctx.moveTo(startX2, startY2);
 
 ctx.lineTo(endX2, startY2);
@@ -66,6 +67,7 @@ ctx.lineTo(startX2-(depth2*diffBackPerPixelLeft2), startY2-depth2);//angle on le
 ctx.moveTo(startX2, startY2);
 
 ctx.lineTo(startX2-(depth2*diffBackPerPixelLeft2), startY2-depth2);//angle on left edge
+ctx.strokeStyle = "red";
 ctx.stroke();
 </script>
 
