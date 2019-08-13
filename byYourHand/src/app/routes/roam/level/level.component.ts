@@ -60,9 +60,10 @@ export class LevelComponent implements OnInit {
         this.setSafeFloorsForLevel();
 
         // physically display objects
-        this.canvasService.pushObjectsToGamePage(this.enemies, "enemy");
-        this.canvasService.pushObjectsToGamePage(this.floors, "floor");
-        this.canvasService.pushObjectToGamePage(this.player, "player");
+        this.canvasService.displayGameObjects(this.enemies, "enemy");
+        this.canvasService.displayGameObjects(this.floors, "floor");
+        this.canvasService.displayGameObject(this.player, "player");
+        console.log("thisplayer", this.player);
         this.playerOnFloorDebug = this.isPlayerOnFloor()
     }
 
