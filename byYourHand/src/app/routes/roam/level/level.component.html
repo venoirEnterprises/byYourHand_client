@@ -1,8 +1,5 @@
 <div style="float: left;" class="gameBorder">
-
-    <div *ngFor="let displayLevelObject of displayLevelObjects" id="{{displayLevelObject.type}}_{{displayLevelObject.id}}"
-        class="{{displayLevelObject.type}} levelObject" [ngStyle]="{'top': displayLevelObject.y, 'left': displayLevelObject.x, 'width': displayLevelObject.width, 'height': displayLevelObject.height}">
-    </div>
+    <canvas #canvas width="600" height="300"></canvas>
 </div>
 
 <div style="float: right;">

@@ -1,4 +1,4 @@
-import { Component, OnInit, HostListener } from '@angular/core';
+import { Component, OnInit, HostListener, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { Enemy } from '../enemy.dto';
 import { Floor } from '../floor.dto';
 import { DisplayLevelObject } from '../displayLevelObject.dto';
@@ -9,6 +9,7 @@ import { PlayerService } from '../player.service';
 import { Level } from '../level.dto';
 import { PlayerFloorStatus } from '../playerFloorStatus.dto';
 import { LevelService } from '../level.service';
+import { CanvasService } from '../canvas.service';
 
 @Component({
     selector: 'app-level',
@@ -17,18 +18,21 @@ import { LevelService } from '../level.service';
 })
 export class LevelComponent implements OnInit {
 
+    @ViewChild('canvas') public canvas: ElementRef;
+
     playerFloorStatusDebug: String;
     directionDebug: String = "";
     playerOnFloorDebug: boolean;
     // Debug end
     playerFloorStatus: PlayerFloorStatus = PlayerFloorStatus.floorSafe;
     // Run-time player status compared to the floor
-    displayLevelObjects: DisplayLevelObject[] = [];
     enemies: Enemy[] = [];
     floors: Floor[] = [];
     roamService: RoamService;
     playerService: PlayerService;
     levelService: LevelService;
+    canvasService: CanvasService;
+
     safeFloors: boolean[][][];
     level: Level;
     player: Player;
@@ -37,9 +41,12 @@ export class LevelComponent implements OnInit {
         this.roamService = new RoamService();
         this.playerService = new PlayerService();
         this.levelService = new LevelService();
+        this.canvasService = new CanvasService();
     }
 
     ngOnInit() {
+        const levelCanvas: HTMLCanvasElement = this.canvas.nativeElement;
+        this.canvasService.initMap(levelCanvas);
         // set up logical objects for later animations / collision detection
         this.enemies = this.roamService.getEnemies();
         this.floors = this.roamService.getFloors();
@@ -53,9 +60,9 @@ export class LevelComponent implements OnInit {
         this.setSafeFloorsForLevel();
 
         // physically display objects
-        this.pushObjectsToGamePage(this.enemies, "enemy");
-        this.pushObjectsToGamePage(this.floors, "floor");
-        this.player.indexInDisplay = this.pushObjectToGamePage(this.player, "player");
+        this.canvasService.pushObjectsToGamePage(this.enemies, "enemy");
+        this.canvasService.pushObjectsToGamePage(this.floors, "floor");
+        this.player.indexInDisplay = this.canvasService.pushObjectToGamePage(this.player, "player");
         this.playerOnFloorDebug = this.isPlayerOnFloor()
     }
 
@@ -90,7 +97,7 @@ export class LevelComponent implements OnInit {
                 break;
         }
         if (activeKeyPressed) {
-            this.updatePlayerDisplayObject(this.player.indexInDisplay, this.player);
+            this.canvasService.updatePlayerDisplayObject(this.player.indexInDisplay, this.player);
             this.playerOnFloorDebug = this.isPlayerOnFloor();
         }
     }
@@ -149,39 +156,5 @@ export class LevelComponent implements OnInit {
                 this.safeFloors[floor.y][floor.x][0] = true;
             }
         }
-    }
-
-    public updatePlayerDisplayObject(index: number, player: Player): void {
-        this.displayLevelObjects[index].x = this.convertDBValueToDisplayValue(player.x, false);
-        this.displayLevelObjects[index].y = this.convertDBValueToDisplayValue(player.y, false);
-    }
-
-    public pushObjectsToGamePage(loop = [], type: String): void {
-        for (let obj of loop) {
-            obj.indexInDisplay = this.pushObjectToGamePage(obj, type);
-        }
-    }
-
-    public pushObjectToGamePage(obj: any, type: String): number {
-        const halfPxDetection = type.toLowerCase() === "floor";
-        const xModifier = halfPxDetection ? obj.x - 0.5 : obj.x;
-        const widthModifier = halfPxDetection ? obj.width + 1 : obj.width;
-        // Visual display of overhang as in setSafeFloorsForLevel
-        this.displayLevelObjects.push({
-            x: this.convertDBValueToDisplayValue(xModifier, halfPxDetection),
-            y: this.convertDBValueToDisplayValue(obj.y, halfPxDetection),
-            width: this.convertDBValueToDisplayValue(widthModifier, halfPxDetection),
-            height: this.convertDBValueToDisplayValue(obj.height, halfPxDetection),
-            type: type,
-            id: obj.id
-        });
-        return this.displayLevelObjects.length - 1;
-        // Deletion will have to take away 1 from all items that are higher than what's being deleted, but coming soon...
-    }
-
-    public convertDBValueToDisplayValue(dbValue: number, halfPxDetection: boolean): String {
-        const multiplier: number = halfPxDetection ? 16 : 32;
-        dbValue *= multiplier;
-        return dbValue.toString() + "px";
     }
 }
