@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<canvas id="myCanvas" width="600" height="300" style="border:1px solid #d3d3d3;">
+Your browser does not support the HTML5 canvas tag.</canvas>
+
+<script>
+var c = document.getElementById("myCanvas");
+
+var depthForZ = 5;
+var depthCountForA = 2;
+
+
+var ctx = c.getContext("2d");
+ctx.beginPath();
+
+//horizon
+ctx.moveTo(295,5);
+ctx.lineTo(305,5);
+//ctx.moveTo(305,0);
+ctx.stroke();
+
+var horizonX = 300;
+var horizonY = 0;
+
+var startX = 5
+var startY = 145;
+var diffBackPerPixelLeft = (horizonX - startX)/(horizonY - startY);
+
+var endX = 450;
+
+var diffBackPerPixelRight = (horizonX - endX)/(horizonY - startY);
+var depth = 30;
+
+
+//tend toward said horizon first go
+ctx.moveTo(startX, startY);
+
+ctx.lineTo(endX, startY);
+ctx.moveTo(endX, startY);
+ctx.lineTo(endX-(depth*diffBackPerPixelRight), startY-depth);//angle on right edge
+ctx.moveTo(endX-(depth*diffBackPerPixelRight), startY-depth);
+ctx.lineTo(startX-(depth*diffBackPerPixelLeft), startY-depth);//angle on left edge
+ctx.moveTo(startX, startY);
+
+ctx.lineTo(startX-(depth*diffBackPerPixelLeft), startY-depth);//angle on left edge
+
+
+ctx.stroke();
+
+//second one
+
+var startX2 = 50;
+var startY2 = 250;
+var diffBackPerPixelLeft2 = (horizonX - startX2)/(horizonY - startY2);
+
+var endX2 = 100;
+var diffBackPerPixelRight2 = (horizonX - endX2)/(horizonY - startY2);
+
+var depth2 = 60;
+
+ctx.moveTo(startX2, startY2);
+
+ctx.lineTo(endX2, startY2);
+ctx.moveTo(endX2, startY2);
+ctx.lineTo(endX2-(depth2*diffBackPerPixelRight2), startY2-depth2);//angle on right edge
+ctx.moveTo(endX2-(depth2*diffBackPerPixelRight2), startY2-depth2);
+ctx.lineTo(startX2-(depth2*diffBackPerPixelLeft2), startY2-depth2);//angle on left edge
+ctx.moveTo(startX2, startY2);
+
+ctx.lineTo(startX2-(depth2*diffBackPerPixelLeft2), startY2-depth2);//angle on left edge
+ctx.stroke();
+</script>
+
+<p><strong>Note:</strong> The canvas tag is not supported in Internet 
+Explorer 8 and earlier versions.</p>
+
+</body>
+</html>
