@@ -8,6 +8,7 @@ import { Player } from './player.dto';
 import { PlayerService } from '../player.service';
 import { Level } from '../level.dto';
 import { PlayerFloorStatus } from '../playerFloorStatus.dto';
+import { LevelService } from '../level.service';
 
 @Component({
     selector: 'app-level',
@@ -27,6 +28,7 @@ export class LevelComponent implements OnInit {
     floors: Floor[] = [];
     roamService: RoamService;
     playerService: PlayerService;
+    levelService: LevelService;
     safeFloors: boolean[][][];
     level: Level;
     player: Player;
@@ -34,6 +36,7 @@ export class LevelComponent implements OnInit {
     constructor() {
         this.roamService = new RoamService();
         this.playerService = new PlayerService();
+        this.levelService = new LevelService();
     }
 
     ngOnInit() {
@@ -44,10 +47,10 @@ export class LevelComponent implements OnInit {
         this.player = this.playerService.getPlayer(this.level.startX, this.level.startY, this.level.startZ);
 
         // floors begin
-        this.safeFloors = this.setUpLevelArray();
+        this.safeFloors = this.levelService.setUpLevelArray();
+        // console.log("thisSafeFloors", this.safeFloors);
+        // console.log("thisFloors", this.floors);
         this.setSafeFloorsForLevel();
-        console.log("thisSafeFloors", this.safeFloors);
-        console.log("thisFloors", this.floors);
 
         // physically display objects
         this.pushObjectsToGamePage(this.enemies, "enemy");
@@ -65,12 +68,22 @@ export class LevelComponent implements OnInit {
         let activeKeyPressed = true;
         switch (ev.keyCode) {
             case this.player.keyMoveLeft:
-                this.player.x -= .5;
-                this.directionDebug = "left";
+                if (this.player.x > this.level.leftBoundary) {
+                    this.player.x -= .5;
+                    this.directionDebug = "left";
+                }
+                else {
+                    this.directionDebug = "maxLeftReached";
+                }
                 break;
             case this.player.keyMoveRight:
-                this.player.x += .5;
-                this.directionDebug = "right";
+                if (this.player.x < this.level.rightBoundary) {
+                    this.player.x += .5;
+                    this.directionDebug = "right";
+                }
+                else {
+                    this.directionDebug = "maxRightReached"
+                }
                 break;
             default:
                 activeKeyPressed = false;
@@ -90,8 +103,8 @@ export class LevelComponent implements OnInit {
         const leftFloorSafe = this.safeFloors[playerBottom][playerX][0];
         const rightFloorSafe = this.safeFloors[playerBottom][playerX + (this.player.width * 2)][0];
 
-        console.log(`the player is at x:${playerX} and y:${playerBottom} the right side being:${playerX + (this.player.width * 2)}`)
-        console.log('playerThis', this.player);
+        // console.log(`the player is at x:${playerX} and y:${playerBottom} the right side being:${playerX + (this.player.width * 2)}`)
+        // console.log('playerThis', this.player);
         let floorExistsBelow = false;
         for (var i = playerBottom + 1; i <= this.safeFloors.length - 1; i++) {
             if (this.safeFloors[i][playerX][0])
@@ -136,158 +149,6 @@ export class LevelComponent implements OnInit {
                 this.safeFloors[floor.y][floor.x][0] = true;
             }
         }
-    }
-
-    public setUpLevelArray(): boolean[][][] {
-        return [
-            [
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false]
-            ],
-            [
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false]
-            ],
-            [
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false]
-            ],
-            [
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false]
-            ],
-            [
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false]
-            ],
-            [
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false]
-            ],
-            [
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false]
-            ],
-            [
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false]
-            ],
-            [
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false]
-            ],
-            [
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false]
-            ],
-            [
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false]
-            ],
-            [
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false]
-            ],
-            [
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false]
-            ],
-            [
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false]
-            ],
-            [
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false]
-            ],
-            [
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false]
-            ],
-            [
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false]
-            ],
-            [
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false]
-            ],
-            [
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false]
-            ],
-            [
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false]
-            ],
-            [
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false], [false, false], [false, false], [false, false],
-                [false, false], [false, false]
-            ]
-        ]
     }
 
     public updatePlayerDisplayObject(index: number, player: Player): void {

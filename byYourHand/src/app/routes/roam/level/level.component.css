@@ -13,3 +13,11 @@
 .player {
     background-color: green;
 }
+
+.gameBorder {
+    position:absolute; 
+    left:32px;
+    border: 2px solid blue;
+    width: 1024px;
+    height: 640px;
+}

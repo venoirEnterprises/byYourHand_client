@@ -1,8 +1,12 @@
-<div *ngFor="let displayLevelObject of displayLevelObjects" id="{{displayLevelObject.type}}_{{displayLevelObject.id}}" class="{{displayLevelObject.type}} levelObject" [ngStyle]="{'top': displayLevelObject.y, 'left': displayLevelObject.x, 'width': displayLevelObject.width, 'height': displayLevelObject.height}">
+<div style="float: left;" class="gameBorder">
+
+    <div *ngFor="let displayLevelObject of displayLevelObjects" id="{{displayLevelObject.type}}_{{displayLevelObject.id}}"
+        class="{{displayLevelObject.type}} levelObject" [ngStyle]="{'top': displayLevelObject.y, 'left': displayLevelObject.x, 'width': displayLevelObject.width, 'height': displayLevelObject.height}">
+    </div>
 </div>
 
 <div style="float: right;">
-<p>Direction: {{directionDebug}}</p>
-<p><b>Player on floor: {{playerOnFloorDebug}}</b></p>
-<p>Player floor status: {{playerFloorStatusDebug}}</p>
+    <p>Direction: {{directionDebug}}</p>
+    <p><b>Player on floor: {{playerOnFloorDebug}}</b></p>
+    <p>Player floor status: {{playerFloorStatusDebug}}</p>
 </div>

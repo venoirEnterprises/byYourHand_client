@@ -3,4 +3,7 @@ export class Level {
     startY: number;
     startZ: number;
     // For the player, this is where they spawn.
+
+    leftBoundary: number;
+    rightBoundary: number;
 }
