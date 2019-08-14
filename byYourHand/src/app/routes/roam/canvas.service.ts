@@ -10,7 +10,7 @@ import { createText } from '@angular/core/src/view/text';
 export class CanvasService {
     private displayLevelObjects: DisplayLevelObject[] = [];
     private cx: CanvasRenderingContext2D;
-    private horizonX: number = 512;
+    private horizonX: number;
     private horizonY: number;
     private currentPlayerFloor: number = 6;
     // "floor" the player is on [their y coordinate], for now all other canvases are just 2D, enemies e.g. shouldn't be able to phase through wall without that being a property
@@ -20,16 +20,18 @@ export class CanvasService {
     public initMap(canvas: HTMLCanvasElement): void {
         this.cx = canvas.getContext('2d');
         this.cx.beginPath();
+        this.horizonX = canvas.width / 2;
         this.cx.moveTo(this.horizonX - 5, this.horizonY + 5);
         this.cx.lineTo(this.horizonX + 5, this.horizonY + 5);
         this.cx.stroke();
         this.cx.closePath();
     }
 
-    public pushLogicalGameObjectToCanvasDisplay(obj: any, type: String): void {
-        console.log(`my type is ${type}`);
-        console.log(obj);
+    public clearCanvasForRedrawing(canvas: HTMLCanvasElement) : void {
+        this.cx.clearRect(0, 0, canvas.width, canvas.height);
+    }
 
+    public pushLogicalGameObjectToCanvasDisplay(obj: any, type: String): void {
         var leftEdgeX = obj.x;
         var bottomEdgeY = obj.y;
         var rightEdgeX = obj.x + obj.width;
@@ -76,8 +78,15 @@ export class CanvasService {
         this.cx.lineTo(rightEdgeX - (displayDepth * diffBackPerPixelRightBottomSide), topEdgeY - displayDepth);
         this.cx.moveTo(leftEdgeX, topEdgeY);
         this.cx.lineTo(leftEdgeX, bottomEdgeY);
+        this.cx.lineTo(leftEdgeX - (displayDepth * diffBackPerPixelRightBottomSide), bottomEdgeY - displayDepth);
+        this.cx.lineTo(leftEdgeX - (displayDepth * diffBackPerPixelRightBottomSide), topEdgeY - displayDepth);
+
+        this.cx.moveTo(leftEdgeX - (displayDepth * diffBackPerPixelRightBottomSide), bottomEdgeY - displayDepth);
+        this.cx.lineTo(rightEdgeX - (displayDepth * diffBackPerPixelRightBottomSide), bottomEdgeY - displayDepth);
+
+
         this.cx.stroke();
-        // this.cx.fill();
+        this.cx.fill();
         this.cx.closePath();
     }
 

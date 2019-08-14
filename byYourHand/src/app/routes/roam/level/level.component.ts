@@ -33,6 +33,7 @@ export class LevelComponent implements OnInit {
     levelService: LevelService;
     canvasService: CanvasService;
 
+    levelCanvas: HTMLCanvasElement;
     safeFloors: boolean[][][];
     level: Level;
     player: Player;
@@ -45,8 +46,8 @@ export class LevelComponent implements OnInit {
     }
 
     ngOnInit() {
-        const levelCanvas: HTMLCanvasElement = this.canvas.nativeElement;
-        this.canvasService.initMap(levelCanvas);
+        this.levelCanvas = this.canvas.nativeElement;
+        this.canvasService.initMap(this.levelCanvas);
         // set up logical objects for later animations / collision detection
         this.enemies = this.roamService.getEnemies();
         this.floors = this.roamService.getFloors();
@@ -59,17 +60,20 @@ export class LevelComponent implements OnInit {
         // console.log("thisFloors", this.floors);
         this.setSafeFloorsForLevel();
 
-        // physically display objects
-        this.canvasService.displayGameObjects(this.enemies, "enemy");
-        this.canvasService.displayGameObjects(this.floors, "floor");
-        this.canvasService.displayGameObject(this.player, "player");
-        console.log("thisplayer", this.player);
-        this.playerOnFloorDebug = this.isPlayerOnFloor()
+        this.renderUpsertedGameEntities();
     }
 
     @HostListener('document:keydown', ['$event'])
     onKeyDown(ev: KeyboardEvent) {
         this.respondToKeyPress(ev);
+    }
+
+    public renderUpsertedGameEntities(): void {
+        // physically display objects
+        this.canvasService.displayGameObjects(this.enemies, "enemy");
+        this.canvasService.displayGameObjects(this.floors, "floor");
+        this.canvasService.displayGameObject(this.player, "player");
+        this.playerOnFloorDebug = this.isPlayerOnFloor();
     }
 
     public respondToKeyPress(ev: KeyboardEvent): void {
@@ -98,9 +102,10 @@ export class LevelComponent implements OnInit {
                 break;
         }
         if (activeKeyPressed) {
-            // this.canvasService.updatePlayerDisplayObject(this.player);
+            this.canvasService.clearCanvasForRedrawing(this.levelCanvas);
+
             // need to redraw the canvas each time, which could loop on display objects, or just be rendered from the call each time?
-            this.playerOnFloorDebug = this.isPlayerOnFloor();
+            this.renderUpsertedGameEntities();
         }
     }
 
