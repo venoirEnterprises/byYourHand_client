@@ -21,7 +21,7 @@ export class LevelComponent implements OnInit {
     @ViewChild('canvas') public canvas: ElementRef;
 
     playerFloorStatusDebug: String;
-    directionDebug: String = "";
+    directionDebug: String = '';
     playerOnFloorDebug: boolean;
     // Debug end
     playerFloorStatus: PlayerFloorStatus = PlayerFloorStatus.floorSafe;
@@ -56,11 +56,11 @@ export class LevelComponent implements OnInit {
 
         // floors begin
         this.safeFloors = this.levelService.setUpLevelArray();
-        // console.log("thisSafeFloors", this.safeFloors);
-        // console.log("thisFloors", this.floors);
+        // console.log('thisSafeFloors', this.safeFloors);
+        // console.log('thisFloors', this.floors);
         this.setSafeFloorsForLevel();
 
-        this.renderUpsertedGameEntities();
+        this.renderUpsertedGameEntities(this.levelCanvas);
     }
 
     @HostListener('document:keydown', ['$event'])
@@ -68,11 +68,11 @@ export class LevelComponent implements OnInit {
         this.respondToKeyPress(ev);
     }
 
-    public renderUpsertedGameEntities(): void {
+    public renderUpsertedGameEntities(canvas: HTMLCanvasElement): void {
         // physically display objects
-        this.canvasService.displayGameObjects(this.enemies, "enemy");
-        this.canvasService.displayGameObjects(this.floors, "floor");
-        this.canvasService.displayGameObject(this.player, "player");
+        this.canvasService.displayGameObjects(this.enemies, 'enemy', canvas);
+        this.canvasService.displayGameObjects(this.floors, 'floor', canvas);
+        this.canvasService.displayGameObject(this.player, 'player', canvas);
         this.playerOnFloorDebug = this.isPlayerOnFloor();
     }
 
@@ -82,30 +82,34 @@ export class LevelComponent implements OnInit {
             case this.player.keyMoveLeft:
                 if (this.player.x > this.level.leftBoundary) {
                     this.player.x -= .5;
-                    this.directionDebug = "left";
+                    this.directionDebug = 'left';
+                } else {
+                    this.directionDebug = 'maxLeftReached';
                 }
-                else {
-                    this.directionDebug = "maxLeftReached";
-                }
+                break;
+            case this.player.keyMoveUp:
+                this.player.z += .5;
+                break;
+            case this.player.keyMoveDown:
+                this.player.z -= 5;
                 break;
             case this.player.keyMoveRight:
                 if (this.player.x < this.level.rightBoundary) {
                     this.player.x += .5;
-                    this.directionDebug = "right";
-                }
-                else {
-                    this.directionDebug = "maxRightReached"
+                    this.directionDebug = 'right';
+                } else {
+                    this.directionDebug = 'maxRightReached';
                 }
                 break;
             default:
                 activeKeyPressed = false;
+                // console.log(`I pressed the key${ev.keyCode}`)
                 break;
         }
         if (activeKeyPressed) {
             this.canvasService.clearCanvasForRedrawing(this.levelCanvas);
-
             // need to redraw the canvas each time, which could loop on display objects, or just be rendered from the call each time?
-            this.renderUpsertedGameEntities();
+            this.renderUpsertedGameEntities(this.levelCanvas);
         }
     }
 
@@ -120,10 +124,9 @@ export class LevelComponent implements OnInit {
         // console.log(`the player is at x:${playerX} and y:${playerBottom} the right side being:${playerX + (this.player.width * 2)}`)
         // console.log('playerThis', this.player);
         let floorExistsBelow = false;
-        for (var i = playerBottom + 1; i <= this.safeFloors.length - 1; i++) {
-            if (this.safeFloors[i][playerX][0])
+        for (let i = playerBottom + 1; i <= this.safeFloors.length - 1; i++) {
+            if (this.safeFloors[i][playerX][0]) {
             // Check the middle has a match, can fall into edges of floors below in the end
-            {
                 floorExistsBelow = true;
             }
         }
@@ -138,28 +141,25 @@ export class LevelComponent implements OnInit {
 
         if (floorExistsBelow) {
             return true;
-        }
-        else if (!leftFloorSafe && !middleFloorSafe && !rightFloorSafe) {
+        } else if (!leftFloorSafe && !middleFloorSafe && !rightFloorSafe) {
             return false;
-        }
-        else {
+        } else {
             return true;
         }
     }
     public setSafeFloorsForLevel(): void {
-        for (let floor of this.floors) {
+        for (const floor of this.floors) {
             floor.width *= 2;
             floor.height *= 2;
             floor.x *= 2;
             floor.y *= 2;
             // This gets doubled from 1 to 2, as the floors use 16 in the array, compared to 32 for the player
             if (floor.width > 1) {
-                for (var i = floor.x - 1; i < floor.x + floor.width + 1; i++) {
-                    // Add a 16px buffer either side to have "hanging edges"
+                for (let i = floor.x - 1; i < floor.x + floor.width + 1; i++) {
+                    // Add a 16px buffer either side to have 'hanging edges'
                     this.safeFloors[floor.y][i][0] = true;
                 }
-            }
-            else {
+            } else {
                 this.safeFloors[floor.y][floor.x][0] = true;
             }
         }
