@@ -41,7 +41,9 @@ export class RoamService {
     }
 
     public getLevel(): Level {
-        this.level = { startX: 1, startY: 6, startZ: 0, leftBoundary: 0.5, rightBoundary: 30.5   }
+        this.level = {
+            startX: 1, startY: 6, startZ: 0, leftBoundary: 0.5, rightBoundary: 61
+        };
         return this.level;
     }
 }

@@ -17,7 +17,7 @@ export class CanvasService {
     public initMap(canvas: HTMLCanvasElement): void {
         this.cx = canvas.getContext('2d');
         this.cx.beginPath();
-        this.horizonX = canvas.width / 2;
+        this.horizonX = canvas.width;
         this.cx.moveTo(this.horizonX - 5, this.horizonY + 5);
         this.cx.lineTo(this.horizonX + 5, this.horizonY + 5);
         this.cx.stroke();
@@ -35,12 +35,12 @@ export class CanvasService {
         const rightEdgeX = obj.x + obj.width;
         const topEdgeY = obj.y - obj.height - obj.z;
         this.horizonY = topEdgeY - 400;
-        const halfYPoint = canvas.width / 2;
+        const halfYPoint = this.horizonX;
         const showRightSideOfCube = rightEdgeX <= halfYPoint + obj.z;
         const bottomCornerForDepthDisplay = showRightSideOfCube ? rightEdgeX + obj.z : leftEdgeX - obj.z;
         const topCornerForDepthDisplay = !showRightSideOfCube ? rightEdgeX - obj.z : leftEdgeX + obj.z;
 
-        console.log(obj, type);
+        // console.log(obj, type);
         // var diffBackPerPixelLeftBottomSide = (this.horizonX - leftEdgeX) / (this.horizonY - bottomEdgeY);
         const angleForObjectDepthDisplay = (this.horizonX - rightEdgeX) / (this.horizonY - bottomEdgeY);
         // var diffBackPerPixelLeftTopSide = (this.horizonX - leftEdgeX) / (this.horizonY - topEdgeY);
@@ -119,7 +119,7 @@ export class CanvasService {
     }
 
     public convertDBValueToDisplayValue(dbValue: number, halfPxDetection: boolean): number {
-        const multiplier: number = halfPxDetection ? 16 : 32;
+        const multiplier: number = halfPxDetection ? 8 : 16;
         dbValue *= multiplier;
         return dbValue;
     }
