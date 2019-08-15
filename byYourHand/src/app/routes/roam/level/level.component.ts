@@ -27,7 +27,9 @@ export class LevelComponent implements OnInit {
     playerFloorStatus: PlayerFloorStatus = PlayerFloorStatus.floorSafe;
     // Run-time player status compared to the floor
     enemies: Enemy[] = [];
+    enemyIds: String[] = [];
     floors: Floor[] = [];
+    floorIds: String[] = [];
     roamService: RoamService;
     playerService: PlayerService;
     levelService: LevelService;
@@ -71,7 +73,7 @@ export class LevelComponent implements OnInit {
     public renderUpsertedGameEntities(): void {
         this.playerOnFloorDebug = this.isPlayerOnFloor();
         // physically display objects
-        console.log(`my player at x:${this.canvasService.convertDBValueToDisplayValue(this.player.x, false)} and y:${this.canvasService.convertDBValueToDisplayValue(this.player.y, false)}`);
+        // console.log(`my player at x:${this.canvasService.convertDBValueToDisplayValue(this.player.x, false)} and y:${this.canvasService.convertDBValueToDisplayValue(this.player.y, false)}`);
         this.canvasService.displayGameObjects(this.floors, 'floor', this.canvasService.convertDBValueToDisplayValue(this.player.x, false), this.canvasService.convertDBValueToDisplayValue(this.player.y, false));
         this.canvasService.displayGameObject(this.player, 'player', this.canvasService.convertDBValueToDisplayValue(this.player.x, false), this.canvasService.convertDBValueToDisplayValue(this.player.y, false));
         this.canvasService.displayGameObjects(this.enemies, 'enemy', this.canvasService.convertDBValueToDisplayValue(this.player.x, false), this.canvasService.convertDBValueToDisplayValue(this.player.y, false));

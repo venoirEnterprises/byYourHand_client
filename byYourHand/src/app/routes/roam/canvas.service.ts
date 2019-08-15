@@ -18,7 +18,7 @@ export class CanvasService {
         this.cx = canvas.getContext('2d');
         this.cx.beginPath();
         this.horizonX = canvas.width / 2;
-        this.horizonY = -250;
+        // this.horizonY = -250;
         this.cx.moveTo(this.horizonX - 5, this.horizonY + 5);
         this.cx.lineTo(this.horizonX + 5, this.horizonY + 5);
         this.cx.stroke();
@@ -30,13 +30,13 @@ export class CanvasService {
     }
 
     public pushLogicalGameObjectToCanvasDisplay(obj: any, type: String, playerX: number, playerY: number): void {
-        // this.cx.lineWidth = 10;
+        this.cx.lineWidth = 3;
         const leftEdgeX = obj.x;
         const bottomEdgeY = obj.y - obj.z;
         const rightEdgeX = obj.x + obj.width;
         const topEdgeY = obj.y - obj.height - obj.z;
         // this.horizonY = topEdgeY - 400;
-        // this.horizonY = playerY - 200;
+        this.horizonY = playerY - 500;
         // this.horizonX = playerX + 8;
         const halfYPoint = this.horizonX;
         const showRightSideOfCube = rightEdgeX <= halfYPoint + obj.z;
