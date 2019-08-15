@@ -30,15 +30,15 @@ export class CanvasService {
 
     public pushLogicalGameObjectToCanvasDisplay(obj: any, type: String, canvas: HTMLCanvasElement): void {
         this.cx.lineWidth = 10;
-        let leftEdgeX = obj.x;
-        let bottomEdgeY = obj.y - obj.z;
-        let rightEdgeX = obj.x + obj.width;
-        let topEdgeY = obj.y - obj.height - obj.z;
+        const leftEdgeX = obj.x;
+        const bottomEdgeY = obj.y - obj.z;
+        const rightEdgeX = obj.x + obj.width;
+        const topEdgeY = obj.y - obj.height - obj.z;
         this.horizonY = topEdgeY - 400;
         const halfYPoint = canvas.width / 2;
-        let showRightSideOfCube = rightEdgeX <= halfYPoint;
-        let bottomCornerForDepthDisplay = showRightSideOfCube ? rightEdgeX + obj.z : leftEdgeX - obj.z;
-        let topCornerForDepthDisplay = !showRightSideOfCube ? rightEdgeX - obj.z : leftEdgeX + obj.z;
+        const showRightSideOfCube = rightEdgeX <= halfYPoint + obj.z;
+        const bottomCornerForDepthDisplay = showRightSideOfCube ? rightEdgeX + obj.z : leftEdgeX - obj.z;
+        const topCornerForDepthDisplay = !showRightSideOfCube ? rightEdgeX - obj.z : leftEdgeX + obj.z;
 
         console.log(obj, type);
         // var diffBackPerPixelLeftBottomSide = (this.horizonX - leftEdgeX) / (this.horizonY - bottomEdgeY);
@@ -55,7 +55,6 @@ export class CanvasService {
             case 'player':
                 this.cx.strokeStyle = 'green';
                 this.cx.fillStyle = 'lightgreen';
-                console.log("comTopEdge", topEdgeY, topEdgeY - obj.z);
                 break;
             case 'floor':
                 this.cx.strokeStyle = 'black';

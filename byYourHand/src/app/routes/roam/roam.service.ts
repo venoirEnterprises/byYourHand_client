@@ -26,6 +26,9 @@ export class RoamService {
             id: 'startingFloor', x: 1, y: 6, z: 0, width: 4, height: 1, depth: 4, breakable: false, falling: false
         });
         this.floors.push({
+            id: 'bridgeTrial', x: 5, y: 6, z: 3, width: 4, height: 1, depth: 1, breakable: false, falling: false
+        });
+        this.floors.push({
             id: 'timeToJump', x: 9, y: 6, z: 0, width: 2, height: 1, depth: 4, breakable: false, falling: false
         });
         this.floors.push({
@@ -33,7 +36,7 @@ export class RoamService {
         });
         this.floors.push({
             id: 'checkBelow', x: 3, y: 9, z: 0, width: 1, height: 1, depth: 4, breakable: false, falling: false
-        })
+        });
         return this.floors;
     }
 

@@ -69,11 +69,11 @@ export class LevelComponent implements OnInit {
     }
 
     public renderUpsertedGameEntities(canvas: HTMLCanvasElement): void {
+        this.playerOnFloorDebug = this.isPlayerOnFloor();
         // physically display objects
         this.canvasService.displayGameObjects(this.enemies, 'enemy', canvas);
         this.canvasService.displayGameObjects(this.floors, 'floor', canvas);
         this.canvasService.displayGameObject(this.player, 'player', canvas);
-        this.playerOnFloorDebug = this.isPlayerOnFloor();
     }
 
     public respondToKeyPress(ev: KeyboardEvent): void {
@@ -143,6 +143,9 @@ export class LevelComponent implements OnInit {
         if (floorExistsBelow) {
             return true;
         } else if (!leftFloorSafe && !middleFloorSafe && !rightFloorSafe) {
+            this.player.x = this.level.startX + 1, this.player.y = this.level.startY - 1, this.player.z = this.level.startZ;
+            alert('player death');
+            this.playerFloorStatusDebug = 'you just died';
             return false;
         } else {
             return true;
