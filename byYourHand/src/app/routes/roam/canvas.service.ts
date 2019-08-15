@@ -18,7 +18,7 @@ export class CanvasService {
         this.cx = canvas.getContext('2d');
         this.cx.beginPath();
         this.horizonX = canvas.width / 2;
-        this.horizonY = 320;
+        this.horizonY = -250;
         this.cx.moveTo(this.horizonX - 5, this.horizonY + 5);
         this.cx.lineTo(this.horizonX + 5, this.horizonY + 5);
         this.cx.stroke();
@@ -35,7 +35,7 @@ export class CanvasService {
         const bottomEdgeY = obj.y - obj.z;
         const rightEdgeX = obj.x + obj.width;
         const topEdgeY = obj.y - obj.height - obj.z;
-        this.horizonY = topEdgeY - 400;
+        // this.horizonY = topEdgeY - 400;
         // this.horizonY = playerY - 200;
         // this.horizonX = playerX + 8;
         const halfYPoint = this.horizonX;
@@ -43,7 +43,7 @@ export class CanvasService {
         const bottomCornerForDepthDisplay = showRightSideOfCube ? rightEdgeX + obj.z : leftEdgeX - obj.z;
         const topCornerForDepthDisplay = !showRightSideOfCube ? rightEdgeX - obj.z : leftEdgeX + obj.z;
 
-        console.log(`my horizon is ${this.horizonX} and ${this.horizonY}`)
+        // console.log(`my horizon is ${this.horizonX} and ${this.horizonY}`)
         // console.log(obj, type);
         // var diffBackPerPixelLeftBottomSide = (this.horizonX - leftEdgeX) / (this.horizonY - bottomEdgeY);
         const angleForObjectDepthDisplay = (this.horizonX - rightEdgeX) / (this.horizonY - bottomEdgeY);
