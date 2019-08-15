@@ -23,7 +23,7 @@ export class RoamService {
 
     public getFloors(): Floor[] {
         this.floors.push({
-            id: 'startingFloor', x: 1, y: 6, z: 0, width: 4, height: 1, depth: 4, breakable: false, falling: false
+            id: 'startingFloor', x: 1, y: 6, z: 0, width: 4, height: 1, depth: 14, breakable: false, falling: false
         });
         this.floors.push({
             id: 'bridgeTrial', x: 5, y: 6, z: 3, width: 4, height: 1, depth: 1, breakable: false, falling: false
@@ -32,10 +32,10 @@ export class RoamService {
             id: 'timeToJump', x: 9, y: 6, z: 0, width: 2, height: 1, depth: 4, breakable: false, falling: false
         });
         this.floors.push({
-            id: 'depthTest', x: 21, y: 6, z: 2, width: 1, height: 1, depth: 2, breakable: false, falling: false
+            id: 'depthTest', x: 21, y: 6, z: 2, width: 4, height: 1, depth: 2, breakable: false, falling: false
         });
         this.floors.push({
-            id: 'checkBelow', x: 3, y: 9, z: 0, width: 1, height: 1, depth: 4, breakable: false, falling: false
+            id: 'checkBelow', x: 21, y: 11, z: 2, width: 2, height: 5, depth: 2, breakable: false, falling: false
         });
         return this.floors;
     }

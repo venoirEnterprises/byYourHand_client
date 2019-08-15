@@ -17,7 +17,8 @@ export class CanvasService {
     public initMap(canvas: HTMLCanvasElement): void {
         this.cx = canvas.getContext('2d');
         this.cx.beginPath();
-        this.horizonX = canvas.width;
+        this.horizonX = canvas.width / 2;
+        this.horizonY = 320;
         this.cx.moveTo(this.horizonX - 5, this.horizonY + 5);
         this.cx.lineTo(this.horizonX + 5, this.horizonY + 5);
         this.cx.stroke();
@@ -28,18 +29,21 @@ export class CanvasService {
         this.cx.clearRect(0, 0, canvas.width, canvas.height);
     }
 
-    public pushLogicalGameObjectToCanvasDisplay(obj: any, type: String, canvas: HTMLCanvasElement): void {
-        this.cx.lineWidth = 10;
+    public pushLogicalGameObjectToCanvasDisplay(obj: any, type: String, playerX: number, playerY: number): void {
+        // this.cx.lineWidth = 10;
         const leftEdgeX = obj.x;
         const bottomEdgeY = obj.y - obj.z;
         const rightEdgeX = obj.x + obj.width;
         const topEdgeY = obj.y - obj.height - obj.z;
         this.horizonY = topEdgeY - 400;
+        // this.horizonY = playerY - 200;
+        // this.horizonX = playerX + 8;
         const halfYPoint = this.horizonX;
         const showRightSideOfCube = rightEdgeX <= halfYPoint + obj.z;
         const bottomCornerForDepthDisplay = showRightSideOfCube ? rightEdgeX + obj.z : leftEdgeX - obj.z;
         const topCornerForDepthDisplay = !showRightSideOfCube ? rightEdgeX - obj.z : leftEdgeX + obj.z;
 
+        console.log(`my horizon is ${this.horizonX} and ${this.horizonY}`)
         // console.log(obj, type);
         // var diffBackPerPixelLeftBottomSide = (this.horizonX - leftEdgeX) / (this.horizonY - bottomEdgeY);
         const angleForObjectDepthDisplay = (this.horizonX - rightEdgeX) / (this.horizonY - bottomEdgeY);
@@ -72,6 +76,7 @@ export class CanvasService {
         this.cx.lineTo(topCornerForDepthDisplay, topEdgeY); // front top edge
         this.cx.lineTo(topCornerForDepthDisplay, bottomEdgeY); // front left edge
         this.cx.lineTo(bottomCornerForDepthDisplay, bottomEdgeY); // front bottom edge
+        this.cx.lineTo(bottomCornerForDepthDisplay, topEdgeY); // front right edge
 
 
         // cube front face end
@@ -90,17 +95,17 @@ export class CanvasService {
         this.cx.closePath();
     }
 
-    public displayGameObjects(loop = [], type: String, canvas: HTMLCanvasElement): void {
+    public displayGameObjects(loop = [], type: String, playerX: number, playerY: number): void {
         for (const obj of loop) {
 
-            if (obj.y === this.currentPlayerFloor * 2) {
+            // if (obj.y === this.currentPlayerFloor * 2) {
                 // console.log(this.displayGameObject(obj, type));
-                this.displayGameObject(obj, type, canvas);
-            }
+                this.displayGameObject(obj, type, playerX, playerY);
+            // }
         }
     }
 
-    public displayGameObject(obj: any, type: String, canvas: HTMLCanvasElement): void {
+    public displayGameObject(obj: any, type: String, playerX: number, playerY: number): void {
         const halfPxDetection = type.toLowerCase() === 'floor';
         const xModifier = halfPxDetection ? obj.x - 0.5 : obj.x;
         const widthModifier = halfPxDetection ? obj.width + 1 : obj.width;
@@ -114,7 +119,7 @@ export class CanvasService {
             height: this.convertDBValueToDisplayValue(obj.height, halfPxDetection),
             id: obj.id
         });
-        this.pushLogicalGameObjectToCanvasDisplay(gameObject, type, canvas);
+        this.pushLogicalGameObjectToCanvasDisplay(gameObject, type, playerX, playerY);
         // Deletion will have to take away 1 from all items that are higher than what's being deleted, but coming soon...
     }
 

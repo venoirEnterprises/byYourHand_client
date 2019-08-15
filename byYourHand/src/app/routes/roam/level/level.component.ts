@@ -60,7 +60,7 @@ export class LevelComponent implements OnInit {
         // console.log('thisFloors', this.floors);
         this.setSafeFloorsForLevel();
 
-        this.renderUpsertedGameEntities(this.levelCanvas);
+        this.renderUpsertedGameEntities();
     }
 
     @HostListener('document:keydown', ['$event'])
@@ -68,12 +68,14 @@ export class LevelComponent implements OnInit {
         this.respondToKeyPress(ev);
     }
 
-    public renderUpsertedGameEntities(canvas: HTMLCanvasElement): void {
+    public renderUpsertedGameEntities(): void {
         this.playerOnFloorDebug = this.isPlayerOnFloor();
         // physically display objects
-        this.canvasService.displayGameObjects(this.enemies, 'enemy', canvas);
-        this.canvasService.displayGameObjects(this.floors, 'floor', canvas);
-        this.canvasService.displayGameObject(this.player, 'player', canvas);
+        console.log(`my player at x:${this.canvasService.convertDBValueToDisplayValue(this.player.x, false)} and y:${this.canvasService.convertDBValueToDisplayValue(this.player.y, false)}`);
+        this.canvasService.displayGameObjects(this.floors, 'floor', this.canvasService.convertDBValueToDisplayValue(this.player.x, false), this.canvasService.convertDBValueToDisplayValue(this.player.y, false));
+        this.canvasService.displayGameObject(this.player, 'player', this.canvasService.convertDBValueToDisplayValue(this.player.x, false), this.canvasService.convertDBValueToDisplayValue(this.player.y, false));
+        this.canvasService.displayGameObjects(this.enemies, 'enemy', this.canvasService.convertDBValueToDisplayValue(this.player.x, false), this.canvasService.convertDBValueToDisplayValue(this.player.y, false));
+
     }
 
     public respondToKeyPress(ev: KeyboardEvent): void {
@@ -109,7 +111,7 @@ export class LevelComponent implements OnInit {
         if (activeKeyPressed) {
             this.canvasService.clearCanvasForRedrawing(this.levelCanvas);
             // need to redraw the canvas each time, which could loop on display objects, or just be rendered from the call each time?
-            this.renderUpsertedGameEntities(this.levelCanvas);
+            this.renderUpsertedGameEntities();
         }
     }
 
