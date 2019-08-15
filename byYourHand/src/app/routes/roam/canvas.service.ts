@@ -30,15 +30,22 @@ export class CanvasService {
 
     public pushLogicalGameObjectToCanvasDisplay(obj: any, type: String, canvas: HTMLCanvasElement): void {
         this.cx.lineWidth = 10;
-        let leftEdgeX = obj.x;
-        let bottomEdgeY = obj.y;
-        let rightEdgeX = obj.x + obj.width;
-        let topEdgeY = obj.y - obj.height;
+        let leftEdgeX = obj.x + obj.z;
+        let bottomEdgeY = obj.y - obj.z;
+        let rightEdgeX = obj.x + obj.z + obj.width;
+        let topEdgeY = obj.y - obj.height - obj.z;
         this.horizonY = topEdgeY - 400;
         const halfYPoint = canvas.width / 2;
-        const showRightSideOfCube = rightEdgeX <= halfYPoint;
-        const bottomCornerForDepthDisplay = showRightSideOfCube ? rightEdgeX : leftEdgeX;
-        const topCornerForDepthDisplay = !showRightSideOfCube ? rightEdgeX : leftEdgeX;
+        let showRightSideOfCube = rightEdgeX <= halfYPoint;
+        let bottomCornerForDepthDisplay = showRightSideOfCube ? rightEdgeX : leftEdgeX;
+        let topCornerForDepthDisplay = !showRightSideOfCube ? rightEdgeX : leftEdgeX;
+
+        console.log(obj, type);
+        // var diffBackPerPixelLeftBottomSide = (this.horizonX - leftEdgeX) / (this.horizonY - bottomEdgeY);
+        const angleForObjectDepthDisplay = (this.horizonX - rightEdgeX) / (this.horizonY - bottomEdgeY);
+        // var diffBackPerPixelLeftTopSide = (this.horizonX - leftEdgeX) / (this.horizonY - topEdgeY);
+        // var diffBackPerPixelRightTopSide = (this.horizonX - rightEdgeX) / (this.horizonY - topEdgeY);
+        const displayDepth = obj.depth;
 
         switch (type.toLowerCase()) {
             case 'enemy':
@@ -48,11 +55,7 @@ export class CanvasService {
             case 'player':
                 this.cx.strokeStyle = 'green';
                 this.cx.fillStyle = 'lightgreen';
-                const depthOperator = (this.horizonX - rightEdgeX) / (this.horizonY - bottomEdgeY);
-                leftEdgeX = leftEdgeX + depthOperator;
-                bottomEdgeY = bottomEdgeY + depthOperator;
-                rightEdgeX = rightEdgeX + depthOperator;
-                topEdgeY = topEdgeY + depthOperator;
+                console.log("comTopEdge", topEdgeY, topEdgeY - obj.z);
                 break;
             case 'floor':
                 this.cx.strokeStyle = 'black';
@@ -60,14 +63,9 @@ export class CanvasService {
                 break;
         }
 
-        // var diffBackPerPixelLeftBottomSide = (this.horizonX - leftEdgeX) / (this.horizonY - bottomEdgeY);
-        const angleForObjectDepthDisplay = (this.horizonX - rightEdgeX) / (this.horizonY - bottomEdgeY);
-        // var diffBackPerPixelLeftTopSide = (this.horizonX - leftEdgeX) / (this.horizonY - topEdgeY);
-        // var diffBackPerPixelRightTopSide = (this.horizonX - rightEdgeX) / (this.horizonY - topEdgeY);
-        const displayDepth = obj.depth;
 
         this.cx.beginPath();
-        this.cx.moveTo(leftEdgeX, bottomEdgeY);
+        this.cx.moveTo(bottomCornerForDepthDisplay, bottomEdgeY);
 
         // cube front face start
         this.cx.lineTo(bottomCornerForDepthDisplay, bottomEdgeY); // front bottom edge

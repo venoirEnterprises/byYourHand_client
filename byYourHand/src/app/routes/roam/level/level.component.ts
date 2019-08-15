@@ -91,7 +91,7 @@ export class LevelComponent implements OnInit {
                 this.player.z += .5;
                 break;
             case this.player.keyMoveDown:
-                this.player.z -= 5;
+                this.player.z -= .5;
                 break;
             case this.player.keyMoveRight:
                 if (this.player.x < this.level.rightBoundary) {
