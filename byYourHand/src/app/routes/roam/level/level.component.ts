@@ -117,15 +117,16 @@ export class LevelComponent implements OnInit {
 
         const playerBottom: number = (this.player.y + this.player.height) * 2;
         const playerX: number = this.player.x * 2;
-        const middleFloorSafe = this.safeFloors[playerBottom][playerX + 1][0];
-        const leftFloorSafe = this.safeFloors[playerBottom][playerX][0];
-        const rightFloorSafe = this.safeFloors[playerBottom][playerX + (this.player.width * 2)][0];
+        const playerZ: number = this.player.z * 2;
+        const middleFloorSafe = this.safeFloors[playerBottom][playerX + 1][playerZ];
+        const leftFloorSafe = this.safeFloors[playerBottom][playerX][playerZ];
+        const rightFloorSafe = this.safeFloors[playerBottom][playerX + (this.player.width * 2)][playerZ];
 
         // console.log(`the player is at x:${playerX} and y:${playerBottom} the right side being:${playerX + (this.player.width * 2)}`)
         // console.log('playerThis', this.player);
         let floorExistsBelow = false;
         for (let i = playerBottom + 1; i <= this.safeFloors.length - 1; i++) {
-            if (this.safeFloors[i][playerX][0]) {
+            if (this.safeFloors[i][playerX][playerZ]) {
             // Check the middle has a match, can fall into edges of floors below in the end
                 floorExistsBelow = true;
             }
@@ -154,10 +155,12 @@ export class LevelComponent implements OnInit {
             floor.x *= 2;
             floor.y *= 2;
             // This gets doubled from 1 to 2, as the floors use 16 in the array, compared to 32 for the player
-            if (floor.width > 1) {
-                for (let i = floor.x - 1; i < floor.x + floor.width + 1; i++) {
+            if (floor.width > 1 || floor.depth > 1) {
+                for (let xindex = floor.x - 1; xindex < floor.x + floor.width + 1; xindex++) {
                     // Add a 16px buffer either side to have 'hanging edges'
-                    this.safeFloors[floor.y][i][0] = true;
+                    for (let zindex = floor.z - 1; zindex < floor.z + floor.depth + 1; zindex++) {
+                        this.safeFloors[floor.y][xindex][zindex] = true;
+                    }
                 }
             } else {
                 this.safeFloors[floor.y][floor.x][0] = true;
