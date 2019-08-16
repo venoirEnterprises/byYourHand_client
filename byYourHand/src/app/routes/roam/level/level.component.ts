@@ -23,7 +23,8 @@ export class LevelComponent implements OnInit {
 
     playerFloorStatusDebug: String;
     directionDebug: String = '';
-    playerOnFloorDebug: boolean;
+    playerLivesDebug: number;
+    playerHealthDebug: number;
     // Debug end
     playerFloorStatus: PlayerFloorStatus = PlayerFloorStatus.floorSafe;
     // Run-time player status compared to the floor
@@ -57,6 +58,8 @@ export class LevelComponent implements OnInit {
         this.level = this.roamService.getLevel();
         this.checkpoints = this.roamService.getCheckpoints();
         this.player = this.playerService.getPlayer(this.checkpoints[0].x, this.checkpoints[0].y, this.checkpoints[0].z);
+        this.playerHealthDebug = this.player.health;
+        this.playerLivesDebug = this.player.lives;
 
         // floors begin
         this.safeFloors = this.levelService.setUpLevelArray();
@@ -73,7 +76,6 @@ export class LevelComponent implements OnInit {
     }
 
     public renderUpsertedGameEntities(): void {
-        this.playerOnFloorDebug = this.isPlayerOnFloor();
         const playerX = this.canvasService.convertDBValueToDisplayValue(this.player.x, false);
         const playerY = this.canvasService.convertDBValueToDisplayValue(this.player.y, false);
         // physically display objects
