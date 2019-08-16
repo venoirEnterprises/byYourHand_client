@@ -1,5 +1,3 @@
-import { FormatWidth } from "@angular/common";
-
 export class LevelObject {
     // The base logical object
     x: number;

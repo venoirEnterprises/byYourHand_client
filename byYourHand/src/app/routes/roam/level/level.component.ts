@@ -10,6 +10,7 @@ import { Level } from '../level.dto';
 import { PlayerFloorStatus } from '../playerFloorStatus.dto';
 import { LevelService } from '../level.service';
 import { CanvasService } from '../canvas.service';
+import { LevelObject } from '../levelObject.dto';
 
 @Component({
     selector: 'app-level',
@@ -27,9 +28,9 @@ export class LevelComponent implements OnInit {
     playerFloorStatus: PlayerFloorStatus = PlayerFloorStatus.floorSafe;
     // Run-time player status compared to the floor
     enemies: Enemy[] = [];
-    enemyIds: String[] = [];
     floors: Floor[] = [];
-    floorIds: String[] = [];
+    checkpoints: LevelObject[] = [];
+
     roamService: RoamService;
     playerService: PlayerService;
     levelService: LevelService;
@@ -54,7 +55,8 @@ export class LevelComponent implements OnInit {
         this.enemies = this.roamService.getEnemies();
         this.floors = this.roamService.getFloors();
         this.level = this.roamService.getLevel();
-        this.player = this.playerService.getPlayer(this.level.startX, this.level.startY, this.level.startZ);
+        this.checkpoints = this.roamService.getCheckpoints();
+        this.player = this.playerService.getPlayer(this.checkpoints[0].x, this.checkpoints[0].y, this.checkpoints[0].z);
 
         // floors begin
         this.safeFloors = this.levelService.setUpLevelArray();
@@ -72,12 +74,14 @@ export class LevelComponent implements OnInit {
 
     public renderUpsertedGameEntities(): void {
         this.playerOnFloorDebug = this.isPlayerOnFloor();
+        const playerX = this.canvasService.convertDBValueToDisplayValue(this.player.x, false);
+        const playerY = this.canvasService.convertDBValueToDisplayValue(this.player.y, false);
         // physically display objects
         // console.log(`my player at x:${this.canvasService.convertDBValueToDisplayValue(this.player.x, false)} and y:${this.canvasService.convertDBValueToDisplayValue(this.player.y, false)}`);
-        this.canvasService.displayGameObjects(this.floors, 'floor', this.canvasService.convertDBValueToDisplayValue(this.player.x, false), this.canvasService.convertDBValueToDisplayValue(this.player.y, false));
-        this.canvasService.displayGameObject(this.player, 'player', this.canvasService.convertDBValueToDisplayValue(this.player.x, false), this.canvasService.convertDBValueToDisplayValue(this.player.y, false));
-        this.canvasService.displayGameObjects(this.enemies, 'enemy', this.canvasService.convertDBValueToDisplayValue(this.player.x, false), this.canvasService.convertDBValueToDisplayValue(this.player.y, false));
-
+        this.canvasService.displayGameObjects(this.floors, 'floor', playerX, playerY);
+        this.canvasService.displayGameObjects(this.enemies, 'enemy', playerX, playerY);
+        this.canvasService.displayGameObjects(this.checkpoints, 'checkpoint', playerX, playerY);
+        this.canvasService.displayGameObject(this.player, 'player', playerX, playerY);
     }
 
     public respondToKeyPress(ev: KeyboardEvent): void {
@@ -147,7 +151,7 @@ export class LevelComponent implements OnInit {
         if (floorExistsBelow) {
             return true;
         } else if (!leftFloorSafe && !middleFloorSafe && !rightFloorSafe) {
-            this.player.x = this.level.startX + 1, this.player.y = this.level.startY - 1, this.player.z = this.level.startZ;
+            this.player.x = this.player.checkpointX, this.player.y = this.player.checkpointY, this.player.z = this.player.checkpointZ;
             alert('player death');
             this.playerFloorStatusDebug = 'you just died';
             return false;

@@ -50,23 +50,24 @@ export class CanvasService {
         // var diffBackPerPixelLeftTopSide = (this.horizonX - leftEdgeX) / (this.horizonY - topEdgeY);
         // var diffBackPerPixelRightTopSide = (this.horizonX - rightEdgeX) / (this.horizonY - topEdgeY);
         const displayDepth = obj.depth;
+        let strokeColor = 'black';
+        let fillColor = 'gray';
 
         switch (type.toLowerCase()) {
             case 'enemy':
-                this.cx.strokeStyle = 'crimson';
-                this.cx.fillStyle = 'red';
+                strokeColor = 'crimson';
+                fillColor = 'orange';
                 break;
             case 'player':
-                this.cx.strokeStyle = 'green';
-                this.cx.fillStyle = 'lightgreen';
+                strokeColor = 'green';
+                fillColor = 'lightgreen';
                 break;
-            case 'floor':
-                this.cx.strokeStyle = 'black';
-                this.cx.fillStyle = 'gray';
-                break;
+            case 'checkpoint':
+                strokeColor = 'yellow';
+                fillColor = 'purple';
         }
-
-
+        this.cx.strokeStyle = strokeColor;
+        this.cx.fillStyle = fillColor;
         this.cx.beginPath();
         this.cx.moveTo(bottomCornerForDepthDisplay, bottomEdgeY);
 
@@ -99,8 +100,8 @@ export class CanvasService {
         for (const obj of loop) {
 
             // if (obj.y === this.currentPlayerFloor * 2) {
-                // console.log(this.displayGameObject(obj, type));
-                this.displayGameObject(obj, type, playerX, playerY);
+            // console.log(this.displayGameObject(obj, type));
+            this.displayGameObject(obj, type, playerX, playerY);
             // }
         }
     }

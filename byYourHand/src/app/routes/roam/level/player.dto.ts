@@ -11,4 +11,8 @@ export class Player extends LevelObject {
     health: number;
     movePerPress: number; // if held, on click, or how far they move [*32] when pressing a direction
     builder: boolean;
+    checkpointX: number;
+    checkpointY: number;
+    checkpointZ: number;
+    // When you die, this is where you go
 }
