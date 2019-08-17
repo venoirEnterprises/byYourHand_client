@@ -1,12 +1,9 @@
 <div style="float: left;" class="gameBorder">
-
-    <div *ngFor="let displayLevelObject of displayLevelObjects" id="{{displayLevelObject.type}}_{{displayLevelObject.id}}"
-        class="{{displayLevelObject.type}} levelObject" [ngStyle]="{'top': displayLevelObject.y, 'left': displayLevelObject.x, 'width': displayLevelObject.width, 'height': displayLevelObject.height}">
-    </div>
+    <canvas #canvas width="1024" height="640"></canvas>
 </div>
 
 <div style="float: right;">
     <p>Direction: {{directionDebug}}</p>
-    <p><b>Player on floor: {{playerOnFloorDebug}}</b></p>
+    <p>Player lives: {{playerLivesDebug}}, Player health: {{playerHealthDebug}}</p>
     <p>Player floor status: {{playerFloorStatusDebug}}</p>
 </div>
