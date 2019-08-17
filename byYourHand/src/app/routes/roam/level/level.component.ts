@@ -63,7 +63,7 @@ export class LevelComponent implements OnInit {
         this.floors = this.roamService.getFloors();
         this.level = this.roamService.getLevel();
         this.checkpoints = this.roamService.getCheckpoints();
-        this.player = this.playerService.getPlayer(this.checkpoints[0].x, this.checkpoints[0].y, this.checkpoints[0].z);
+        this.player = this.playerService.getPlayer(this.checkpoints[0].x, this.checkpoints[0].y, this.checkpoints[0].z - (this.checkpoints[0].z / 2));
         this.updatePlayerCoordinates();
         this.playerHealthDebug = this.player.health;
         this.playerLivesDebug = this.player.lives;
@@ -148,9 +148,10 @@ export class LevelComponent implements OnInit {
         const checkpointCollided = this.levelCheckpoints[playerMatchedCheckpointY][this.playerCollisionX + 1][this.playerCollisionZ];
         console.log(`I hit the checkpoint: ${checkpointCollided}`)
         if (checkpointCollided !== undefined && checkpointCollided >= 0) {
+            const matchedCheckpoint = this.checkpoints[checkpointCollided];
             this.player.checkpointX = this.checkpoints[checkpointCollided].x/2;
             this.player.checkpointY = this.checkpoints[checkpointCollided].y/2;
-            this.player.checkpointZ = this.checkpoints[checkpointCollided].z;
+            this.player.checkpointZ = this.checkpoints[checkpointCollided].z-(matchedCheckpoint.depth/2);
         }
         // // this.isPlayerOnFloor();
     }
