@@ -64,6 +64,7 @@ export class LevelComponent implements OnInit {
         this.level = this.roamService.getLevel();
         this.checkpoints = this.roamService.getCheckpoints();
         this.player = this.playerService.getPlayer(this.checkpoints[0].x, this.checkpoints[0].y, this.checkpoints[0].z - (this.checkpoints[0].z / 2));
+        console.log(this.player, 'player');
         this.updatePlayerCoordinates();
         this.playerHealthDebug = this.player.health;
         this.playerLivesDebug = this.player.lives;
@@ -71,7 +72,7 @@ export class LevelComponent implements OnInit {
         // floors begin
         this.safeFloors = this.levelService.setUpLevelArray();
         this.levelCheckpoints = this.levelService.setUpLevelArray();
-        console.log(this.levelCheckpoints);
+        // console.log(this.levelCheckpoints);
         this.startCollisionDetectorArrayForObject(this.floors, 'floor');
         this.startCollisionDetectorArrayForObject(this.checkpoints, 'checkpoint');
 
@@ -146,14 +147,18 @@ export class LevelComponent implements OnInit {
     public isPlayerInCheckpoint(): void {
         const playerMatchedCheckpointY = this.playerCollisionBottom - this.player.height * 2;
         const checkpointCollided = this.levelCheckpoints[playerMatchedCheckpointY][this.playerCollisionX + 1][this.playerCollisionZ];
-        console.log(`I hit the checkpoint: ${checkpointCollided}`)
+        // console.log(`I hit the checkpoint: ${checkpointCollided}`)
         if (checkpointCollided !== undefined && checkpointCollided >= 0) {
-            const matchedCheckpoint = this.checkpoints[checkpointCollided];
-            this.player.checkpointX = this.checkpoints[checkpointCollided].x/2;
-            this.player.checkpointY = this.checkpoints[checkpointCollided].y/2;
-            this.player.checkpointZ = this.checkpoints[checkpointCollided].z-(matchedCheckpoint.depth/2);
+            this.updatePlayerCheckpoint(checkpointCollided);
         }
         // // this.isPlayerOnFloor();
+    }
+
+    public updatePlayerCheckpoint(checkpointIndex: number): void {
+        const matchedCheckpoint = this.checkpoints[checkpointIndex];
+            this.player.checkpointX = this.checkpoints[checkpointIndex].x/2;
+            this.player.checkpointY = this.checkpoints[checkpointIndex].y/2;
+            this.player.checkpointZ = this.checkpoints[checkpointIndex].z-(matchedCheckpoint.depth/2);
     }
 
     public isPlayerOnFloor(): boolean {
@@ -182,10 +187,21 @@ export class LevelComponent implements OnInit {
         if (floorExistsBelow) {
             return true;
         } else if (playerFloorStatus === PlayerFloorStatus.nofloor) {
+            this.player.lives -= 1;
+            if (this.player.lives === 0)
+            {
+                this.updatePlayerCheckpoint(0);
+                this.playerFloorStatusDebug = 'game over, reset';
+                alert("game over, reset");
+                this.player.lives = 3;
+                console.log(this.player, 'player');
+            }
+            else {
+                this.playerFloorStatusDebug = 'you just died, to checkpoint';
+                alert('you just died, to checkpoint');
+            }
             this.player.x = this.player.checkpointX, this.player.y = this.player.checkpointY, this.player.z = this.player.checkpointZ;
-            alert('player death');
-            console.log(this.player.x, this.player.y, this.player.z);
-            this.playerFloorStatusDebug = 'you just died';
+            this.playerLivesDebug = this.player.lives;
             return false;
         } else {
             return true;
@@ -204,7 +220,7 @@ export class LevelComponent implements OnInit {
             collisionObject.height *= 2;
             collisionObject.x *= 2;
             collisionObject.y *= 2;
-            console.log(objectType, collisionObject, objToLoop.length);
+            // console.log(objectType, collisionObject, objToLoop.length);
             // This gets doubled from 1 to 2, as the floors use 16 in the array, compared to 32 for the player
             if (collisionObject.width > 1 || collisionObject.depth > 1) {
                 for (let xindex = collisionObject.x - 1; xindex < collisionObject.x + collisionObject.width + 1; xindex++) {
