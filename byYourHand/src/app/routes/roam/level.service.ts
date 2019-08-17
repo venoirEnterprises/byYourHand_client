@@ -13,7 +13,7 @@ export class LevelService {
              for( var xIndex = 0; xIndex < 130; xIndex++ ) {
                 levelDisplayArray[yIndex][xIndex] = [];
                   for (var zIndex = 0; zIndex < 130; zIndex++) {
-                      levelDisplayArray[yIndex][xIndex][zIndex] = 0;
+                      levelDisplayArray[yIndex][xIndex][zIndex] = -1;
                  };
             };
         };

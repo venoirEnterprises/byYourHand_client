@@ -147,7 +147,7 @@ export class LevelComponent implements OnInit {
         const playerMatchedCheckpointY = this.playerCollisionBottom - this.player.height * 2;
         const checkpointCollided = this.levelCheckpoints[playerMatchedCheckpointY][this.playerCollisionX + 1][this.playerCollisionZ];
         console.log(`I hit the checkpoint: ${checkpointCollided}`)
-        if (checkpointCollided) {
+        if (checkpointCollided !== undefined && checkpointCollided >= 0) {
             this.player.checkpointX = this.checkpoints[checkpointCollided].x/2;
             this.player.checkpointY = this.checkpoints[checkpointCollided].y/2;
             this.player.checkpointZ = this.checkpoints[checkpointCollided].z;
@@ -164,15 +164,15 @@ export class LevelComponent implements OnInit {
         // console.log('playerThis', this.player);
         let floorExistsBelow = false;
         for (let i = this.playerCollisionBottom + 1; i <= this.safeFloors.length - 1; i++) {
-            if (this.safeFloors[i][this.playerCollisionX][this.playerCollisionZ]) {
+            if (this.safeFloors[i][this.playerCollisionX][this.playerCollisionZ] >=0) {
             // Check the middle has a match, can fall into edges of floors below in the end
                 floorExistsBelow = true;
             }
         }
 
-        const playerFloorStatus = leftFloorSafe && middleFloorSafe && rightFloorSafe ? PlayerFloorStatus.floorSafe :
-            (!leftFloorSafe && middleFloorSafe && rightFloorSafe) || (!leftFloorSafe && !middleFloorSafe && rightFloorSafe) ? PlayerFloorStatus.floorLeftEdge :
-                (leftFloorSafe && middleFloorSafe && !rightFloorSafe) || (leftFloorSafe && !middleFloorSafe && !rightFloorSafe) ? PlayerFloorStatus.floorRightEdge :
+        const playerFloorStatus = leftFloorSafe>=0 && middleFloorSafe>=0 && rightFloorSafe>=0 ? PlayerFloorStatus.floorSafe :
+            (leftFloorSafe < 0 && middleFloorSafe >=0 && rightFloorSafe >=0) || (leftFloorSafe < 0 && middleFloorSafe < 0 && rightFloorSafe >=0) ? PlayerFloorStatus.floorLeftEdge :
+                (leftFloorSafe >=0 && middleFloorSafe >=0 && rightFloorSafe < 0) || (leftFloorSafe >=0 && middleFloorSafe <0 && rightFloorSafe < 0) ? PlayerFloorStatus.floorRightEdge :
                     floorExistsBelow ? PlayerFloorStatus.floorDown : PlayerFloorStatus.nofloor;
 
         this.playerFloorStatusDebug = playerFloorStatus;
@@ -180,7 +180,7 @@ export class LevelComponent implements OnInit {
 
         if (floorExistsBelow) {
             return true;
-        } else if (!leftFloorSafe && !middleFloorSafe && !rightFloorSafe) {
+        } else if (playerFloorStatus === PlayerFloorStatus.nofloor) {
             this.player.x = this.player.checkpointX, this.player.y = this.player.checkpointY, this.player.z = this.player.checkpointZ;
             alert('player death');
             console.log(this.player.x, this.player.y, this.player.z);
