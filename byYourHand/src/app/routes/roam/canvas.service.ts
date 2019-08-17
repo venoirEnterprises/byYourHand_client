@@ -31,6 +31,7 @@ export class CanvasService {
 
     public pushLogicalGameObjectToCanvasDisplay(obj: any, type: String, playerX: number, playerY: number): void {
         this.cx.lineWidth = 3;
+        // console.log(type, obj);
         const leftEdgeX = obj.x;
         const bottomEdgeY = obj.y - obj.z;
         const rightEdgeX = obj.x + obj.width;
@@ -107,7 +108,7 @@ export class CanvasService {
     }
 
     public displayGameObject(obj: any, type: String, playerX: number, playerY: number): void {
-        const halfPxDetection = type.toLowerCase() === 'floor';
+        const halfPxDetection = type.toLowerCase() === 'floor' || type.toLowerCase() === 'checkpoint';
         const xModifier = halfPxDetection ? obj.x - 0.5 : obj.x;
         const widthModifier = halfPxDetection ? obj.width + 1 : obj.width;
         // Visual display of overhang as in setSafeFloorsForLevel
@@ -120,6 +121,7 @@ export class CanvasService {
             height: this.convertDBValueToDisplayValue(obj.height, halfPxDetection),
             id: obj.id
         });
+        // console.log(gameObject);
         this.pushLogicalGameObjectToCanvasDisplay(gameObject, type, playerX, playerY);
         // Deletion will have to take away 1 from all items that are higher than what's being deleted, but coming soon...
     }

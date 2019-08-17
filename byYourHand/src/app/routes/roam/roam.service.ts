@@ -42,7 +42,8 @@ export class RoamService {
     }
 
     public getCheckpoints(): LevelObject[] {
-        this.checkpoints.push({ x: 2, y: 5, z: 0, width: 1, depth: .5, height: 0 });
+        this.checkpoints.push({ x: 2, y: 5, z: 1, width: 1, depth: 1, height: 0 });
+        this.checkpoints.push({ x: 19, y: 5, z: 1, width: 1, depth: 1, height: 0 });
         return this.checkpoints;
     }
 }
