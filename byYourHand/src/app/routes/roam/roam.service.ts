@@ -13,6 +13,7 @@ export class RoamService {
     enemies: Enemy[] = [];
     floors: Floor[] = [];
     level: Level;
+    player: Player;
     checkpoints: LevelObject[] = [];
     constructor() { }
 
@@ -45,5 +46,12 @@ export class RoamService {
         this.checkpoints.push({ x: 2, y: 5, z: 1, width: 1, depth: 1, height: 0 });
         this.checkpoints.push({ x: 19, y: 5, z: 1, width: 1, depth: 1, height: 0 });
         return this.checkpoints;
+    }
+
+    public getPlayer(levelStartX: number, levelStartY: number, levelStartZ: number): Player {
+        this.player = {
+            x: levelStartX, y: levelStartY, z: levelStartZ, width: 1, height: 1, depth: 0.5, keyMoveLeft: 65, keyMoveUp: 87, keyMoveDown: 83, keyMoveRight: 68, name: 'firstPlayer', health: 100, lives: 3, movePerPress: 1, builder: false, checkpointX: levelStartX, checkpointY: levelStartY, checkpointZ: levelStartZ
+        };
+        return this.player;
     }
 }

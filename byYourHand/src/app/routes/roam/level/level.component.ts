@@ -1,16 +1,15 @@
-import { Component, OnInit, HostListener, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, OnInit, HostListener, ViewChild, ElementRef } from '@angular/core';
 import { Enemy } from '../enemy.dto';
 import { Floor } from '../floor.dto';
-import { DisplayLevelObject } from '../displayLevelObject.dto';
 import { RoamService } from '../roam.service';
 import { PlayerKeyBoard } from '../playerKeyboard.dto';
 import { Player } from './player.dto';
-import { PlayerService } from '../player.service';
 import { Level } from '../level.dto';
 import { PlayerFloorStatus } from '../playerFloorStatus.dto';
 import { LevelService } from '../level.service';
 import { CanvasService } from '../canvas.service';
 import { LevelObject } from '../levelObject.dto';
+import { CollisionService } from '../collision.service';
 
 @Component({
     selector: 'app-level',
@@ -33,13 +32,11 @@ export class LevelComponent implements OnInit {
     checkpoints: LevelObject[] = [];
 
     roamService: RoamService;
-    playerService: PlayerService;
     levelService: LevelService;
     canvasService: CanvasService;
+    collisionService: CollisionService;
 
     levelCanvas: HTMLCanvasElement;
-    safeFloors: number[][][];
-    levelCheckpoints: number[][][];
     level: Level;
     player: Player;
     playerNavigationKeys: PlayerKeyBoard[];
@@ -50,12 +47,13 @@ export class LevelComponent implements OnInit {
 
     constructor() {
         this.roamService = new RoamService();
-        this.playerService = new PlayerService();
         this.levelService = new LevelService();
         this.canvasService = new CanvasService();
+        this.collisionService = new CollisionService();
     }
 
     ngOnInit() {
+        this.collisionService.ngOnInit();
         this.levelCanvas = this.canvas.nativeElement;
         this.canvasService.initMap(this.levelCanvas);
         // set up logical objects for later animations / collision detection
@@ -63,18 +61,16 @@ export class LevelComponent implements OnInit {
         this.floors = this.roamService.getFloors();
         this.level = this.roamService.getLevel();
         this.checkpoints = this.roamService.getCheckpoints();
-        this.player = this.playerService.getPlayer(this.checkpoints[0].x, this.checkpoints[0].y, this.checkpoints[0].z - (this.checkpoints[0].z / 2));
+        this.player = this.roamService.getPlayer(this.checkpoints[0].x, this.checkpoints[0].y, this.checkpoints[0].z - (this.checkpoints[0].z / 2));
         console.log(this.player, 'player');
         this.updatePlayerCoordinates();
         this.playerHealthDebug = this.player.health;
         this.playerLivesDebug = this.player.lives;
 
         // floors begin
-        this.safeFloors = this.levelService.setUpLevelArray();
-        this.levelCheckpoints = this.levelService.setUpLevelArray();
         // console.log(this.levelCheckpoints);
-        this.startCollisionDetectorArrayForObject(this.floors, 'floor');
-        this.startCollisionDetectorArrayForObject(this.checkpoints, 'checkpoint');
+        this.collisionService.startCollisionDetectorArrayForObject(this.floors, 'floor');
+        this.collisionService.startCollisionDetectorArrayForObject(this.checkpoints, 'checkpoint');
 
         this.isPlayerOnFloor();
         this.renderUpsertedGameEntities();
@@ -137,56 +133,28 @@ export class LevelComponent implements OnInit {
             this.canvasService.clearCanvasForRedrawing(this.levelCanvas);
             // need to redraw the canvas each time, which could loop on display objects, or just be rendered from the call each time?
             if (this.isPlayerOnFloor()) {
-                this.isPlayerInCheckpoint();
+                this.updatePlayerCheckpoint(this.collisionService.isPlayerInCheckpoint(this.playerCollisionBottom - this.player.height * 2, this.playerCollisionX + 1, this.playerCollisionZ));
             }
 
             this.renderUpsertedGameEntities();
         }
     }
 
-    public isPlayerInCheckpoint(): void {
-        const playerMatchedCheckpointY = this.playerCollisionBottom - this.player.height * 2;
-        const checkpointCollided = this.levelCheckpoints[playerMatchedCheckpointY][this.playerCollisionX + 1][this.playerCollisionZ];
-        // console.log(`I hit the checkpoint: ${checkpointCollided}`)
-        if (checkpointCollided !== undefined && checkpointCollided >= 0) {
-            this.updatePlayerCheckpoint(checkpointCollided);
-        }
-        // // this.isPlayerOnFloor();
-    }
-
     public updatePlayerCheckpoint(checkpointIndex: number): void {
-        const matchedCheckpoint = this.checkpoints[checkpointIndex];
-            this.player.checkpointX = this.checkpoints[checkpointIndex].x/2;
-            this.player.checkpointY = this.checkpoints[checkpointIndex].y/2;
-            this.player.checkpointZ = this.checkpoints[checkpointIndex].z-(matchedCheckpoint.depth/2);
+        if (checkpointIndex >= 0) {
+            const matchedCheckpoint = this.checkpoints[checkpointIndex];
+            this.player.checkpointX = this.checkpoints[checkpointIndex].x / 2;
+            this.player.checkpointY = this.checkpoints[checkpointIndex].y / 2;
+            this.player.checkpointZ = this.checkpoints[checkpointIndex].z - (matchedCheckpoint.depth / 2);
+        }
     }
 
     public isPlayerOnFloor(): boolean {
-        const middleFloorSafe = this.safeFloors[this.playerCollisionBottom][this.playerCollisionX + 1][this.playerCollisionZ];
-        const leftFloorSafe = this.safeFloors[this.playerCollisionBottom][this.playerCollisionX][this.playerCollisionZ];
-        const rightFloorSafe = this.safeFloors[this.playerCollisionBottom][this.playerCollisionX + (this.player.width * 2)][this.playerCollisionZ];
-
-        // console.log(`the player is at x:${this.playerCollisionX} and y:${playerBottom} the right side being:${this.playerCollisionX + (this.player.width * 2)}`)
-        // console.log('playerThis', this.player);
-        let floorExistsBelow = false;
-        for (let i = this.playerCollisionBottom + 1; i <= this.safeFloors.length - 1; i++) {
-            if (this.safeFloors[i][this.playerCollisionX][this.playerCollisionZ] >=0) {
-            // Check the middle has a match, can fall into edges of floors below in the end
-                floorExistsBelow = true;
-            }
-        }
-
-        const playerFloorStatus = leftFloorSafe>=0 && middleFloorSafe>=0 && rightFloorSafe>=0 ? PlayerFloorStatus.floorSafe :
-            (leftFloorSafe < 0 && middleFloorSafe >=0 && rightFloorSafe >=0) || (leftFloorSafe < 0 && middleFloorSafe < 0 && rightFloorSafe >=0) ? PlayerFloorStatus.floorLeftEdge :
-                (leftFloorSafe >=0 && middleFloorSafe >=0 && rightFloorSafe < 0) || (leftFloorSafe >=0 && middleFloorSafe <0 && rightFloorSafe < 0) ? PlayerFloorStatus.floorRightEdge :
-                    floorExistsBelow ? PlayerFloorStatus.floorDown : PlayerFloorStatus.nofloor;
-
-        this.playerFloorStatusDebug = playerFloorStatus;
-        this.playerFloorStatus = playerFloorStatus;
-
-        if (floorExistsBelow) {
+        this.playerFloorStatus = this.collisionService.getCurrentFloorStatusForObject(this.playerCollisionBottom, this.playerCollisionX, this.playerCollisionZ, this.player.width);
+        this.playerFloorStatusDebug = this.playerFloorStatus;
+        if (this.playerFloorStatus === PlayerFloorStatus.floorDown) {
             return true;
-        } else if (playerFloorStatus === PlayerFloorStatus.nofloor) {
+        } else if (this.playerFloorStatus === PlayerFloorStatus.nofloor) {
             this.player.lives -= 1;
             if (this.player.lives === 0)
             {
@@ -205,36 +173,6 @@ export class LevelComponent implements OnInit {
             return false;
         } else {
             return true;
-        }
-    }
-    public startCollisionDetectorArrayForObject(objToLoop: any, objectType: String): void {
-        let collisionArray: number[][][] = this.safeFloors;
-        switch (objectType.toLowerCase()) {
-            case 'checkpoint':
-                collisionArray = this.levelCheckpoints;
-                break;
-        }
-        for (var i = 0; i < objToLoop.length; i++) {
-            let collisionObject = objToLoop[i];
-            collisionObject.width *= 2;
-            collisionObject.height *= 2;
-            collisionObject.x *= 2;
-            collisionObject.y *= 2;
-            // console.log(objectType, collisionObject, objToLoop.length);
-            // This gets doubled from 1 to 2, as the floors use 16 in the array, compared to 32 for the player
-            if (collisionObject.width > 1 || collisionObject.depth > 1) {
-                for (let xindex = collisionObject.x - 1; xindex < collisionObject.x + collisionObject.width + 1; xindex++) {
-                    // Add a 16px buffer either side to have 'hanging edges'
-                    for (let zindex = collisionObject.z - 1; xindex < collisionObject.x + collisionObject.width + 1 && zindex < collisionObject.z + collisionObject.depth + 1; zindex++) {
-                        // if (objectType.toLowerCase() === 'checkpoint') {
-                        //     console.log(collisionObject, xindex, zindex);
-                        // }
-                        collisionArray[collisionObject.y][xindex][zindex] = i;
-                    }
-                }
-            } else {
-                collisionArray[collisionObject.y][collisionObject.x][0] = i;
-            }
         }
     }
 }
