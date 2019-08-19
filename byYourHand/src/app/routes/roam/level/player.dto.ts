@@ -1,11 +1,11 @@
-import { LevelObject } from "../levelObject.dto";
-import { PlayerFloorStatus } from "../playerFloorStatus.dto";
+import { LevelObject } from '../levelObject.dto';
 
 export class Player extends LevelObject {
     keyMoveLeft: number;
     keyMoveRight: number;
     keyMoveUp: number;
     keyMoveDown: number;
+    activeKeys: boolean[];
     // These are key bindings, that will be settings in the end for the user to set their own key
     name: String;
     health: number;

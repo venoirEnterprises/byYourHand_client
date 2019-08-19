@@ -37,7 +37,7 @@ export class RoamService {
 
     public getLevel(): Level {
         this.level = {
-            leftBoundary: 0.5, rightBoundary: 61
+            leftBoundary: 0.5, rightBoundary: 61, tickSpeed: 50
         };
         return this.level;
     }
@@ -50,8 +50,12 @@ export class RoamService {
 
     public getPlayer(levelStartX: number, levelStartY: number, levelStartZ: number): Player {
         this.player = {
-            x: levelStartX, y: levelStartY, z: levelStartZ, width: 1, height: 1, depth: 0.5, keyMoveLeft: 65, keyMoveUp: 87, keyMoveDown: 83, keyMoveRight: 68, name: 'firstPlayer', health: 100, lives: 3, movePerPress: 1, builder: false, checkpointX: levelStartX, checkpointY: levelStartY, checkpointZ: levelStartZ
+            x: levelStartX, y: levelStartY, z: levelStartZ, width: 1, height: 1, depth: 0.5, keyMoveLeft: 65, keyMoveUp: 87, keyMoveDown: 83, keyMoveRight: 68, name: 'firstPlayer', health: 100, lives: 3, movePerPress: 1, builder: false, checkpointX: levelStartX, checkpointY: levelStartY, checkpointZ: levelStartZ, activeKeys: []
         };
+        this.player.activeKeys[this.player.keyMoveLeft] = false;
+        this.player.activeKeys[this.player.keyMoveUp] = false;
+        this.player.activeKeys[this.player.keyMoveDown] = false;
+        this.player.activeKeys[this.player.keyMoveRight] = false;
         return this.player;
     }
 }

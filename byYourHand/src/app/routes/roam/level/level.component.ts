@@ -39,7 +39,8 @@ export class LevelComponent implements OnInit {
     levelCanvas: HTMLCanvasElement;
     level: Level;
     player: Player;
-    playerNavigationKeys: PlayerKeyBoard[];
+    currentlyHeldKeyCode = 0;
+    playerRunning = false;
 
     playerCollisionBottom: number;
     playerCollisionX: number;
@@ -62,7 +63,7 @@ export class LevelComponent implements OnInit {
         this.level = this.roamService.getLevel();
         this.checkpoints = this.roamService.getCheckpoints();
         this.player = this.roamService.getPlayer(this.checkpoints[0].x, this.checkpoints[0].y, this.checkpoints[0].z - (this.checkpoints[0].z / 2));
-        console.log(this.player, 'player');
+        // console.log(this.player, 'player');
         this.updatePlayerCoordinates();
         this.playerHealthDebug = this.player.health;
         this.playerLivesDebug = this.player.lives;
@@ -78,7 +79,36 @@ export class LevelComponent implements OnInit {
 
     @HostListener('document:keydown', ['$event'])
     onKeyDown(ev: KeyboardEvent) {
-        this.respondToKeyPress(ev);
+        if (!this.player.activeKeys[ev.keyCode]) {
+            this.player.activeKeys[ev.keyCode] = true;
+            this.currentlyHeldKeyCode = ev.which;
+            // The key is held down, I don't want to overwhelm the system with that key press, wait a "tick" until kicking the action off again
+            setTimeout(() => {
+                this.respondToKeyPress(ev);
+                this.playerRunning = this.playerKeyEnablesRunning(ev.keyCode);
+                console.log(`am I running? ${this.playerKeyEnablesRunning(ev.keyCode)}`);
+                this.player.activeKeys[ev.keyCode] = false;
+            }, this.level.tickSpeed);
+        } else if (this.currentlyHeldKeyCode !== ev.which) {
+            this.playerRunning = false;
+            this.player.activeKeys[ev.keyCode] = false;
+        } else {
+            return false;
+        }
+    }
+
+    @HostListener('document:keyup', ['$event'])
+    onKeyUp(ev: KeyboardEvent) {
+        this.player.activeKeys[ev.keyCode] = false;
+        this.playerRunning = this.playerKeyEnablesRunning(ev.keyCode);
+        // this.respondToKeyPress(ev);
+    }
+
+    public playerKeyEnablesRunning(keyCode: number): boolean {
+        return this.player.activeKeys[this.player.keyMoveLeft] === true
+            || this.player.activeKeys[this.player.keyMoveUp] === true
+            || this.player.activeKeys[this.player.keyMoveRight] === true
+            || this.player.activeKeys[this.player.keyMoveDown] === true;
     }
 
     public updatePlayerCoordinates(): void {
@@ -98,46 +128,46 @@ export class LevelComponent implements OnInit {
         this.canvasService.displayGameObject(this.player, 'player', playerX, playerY);
     }
 
-    public respondToKeyPress(ev: KeyboardEvent): void {
+    public respondToKeyPress(ev: KeyboardEvent, ): void {
         let activeKeyPressed = true;
-        switch (ev.keyCode) {
-            case this.player.keyMoveLeft:
-                if (this.player.x > this.level.leftBoundary) {
-                    this.player.x -= .5;
-                    this.directionDebug = 'left';
-                } else {
-                    this.directionDebug = 'maxLeftReached';
-                }
-                break;
-            case this.player.keyMoveUp:
-                this.player.z += .5;
-                break;
-            case this.player.keyMoveDown:
-                this.player.z -= .5;
-                break;
-            case this.player.keyMoveRight:
-                if (this.player.x < this.level.rightBoundary) {
-                    this.player.x += .5;
-                    this.directionDebug = 'right';
-                } else {
-                    this.directionDebug = 'maxRightReached';
-                }
-                break;
-            default:
-                activeKeyPressed = false;
-                // console.log(`I pressed the key${ev.keyCode}`)
-                break;
-        }
-        if (activeKeyPressed) {
-            this.updatePlayerCoordinates();
-            this.canvasService.clearCanvasForRedrawing(this.levelCanvas);
-            // need to redraw the canvas each time, which could loop on display objects, or just be rendered from the call each time?
-            if (this.isPlayerOnFloor()) {
-                this.updatePlayerCheckpoint(this.collisionService.isPlayerInCheckpoint(this.playerCollisionBottom - this.player.height * 2, this.playerCollisionX + 1, this.playerCollisionZ));
+        const playerMovement = this.playerRunning ? 1 : .5;
+            switch (ev.keyCode) {
+                case this.player.keyMoveLeft:
+                    if (this.player.x > this.level.leftBoundary) {
+                        this.player.x -= playerMovement;
+                        this.directionDebug = 'left';
+                    } else {
+                        this.directionDebug = 'maxLeftReached';
+                    }
+                    break;
+                case this.player.keyMoveUp:
+                    this.player.z += playerMovement;
+                    break;
+                case this.player.keyMoveDown:
+                    this.player.z -= playerMovement;
+                    break;
+                case this.player.keyMoveRight:
+                    if (this.player.x < this.level.rightBoundary) {
+                        this.player.x += playerMovement;
+                        this.directionDebug = 'right';
+                    } else {
+                        this.directionDebug = 'maxRightReached';
+                    }
+                    break;
+                default:
+                    activeKeyPressed = false;
+                    // console.log(`I pressed the key${ev.keyCode}`, Date.now());
+                    break;
             }
-
-            this.renderUpsertedGameEntities();
-        }
+            if (activeKeyPressed) {
+                this.updatePlayerCoordinates();
+                this.canvasService.clearCanvasForRedrawing(this.levelCanvas);
+                // need to redraw the canvas each time, which could loop on display objects, or just be rendered from the call each time?
+                if (this.isPlayerOnFloor()) {
+                    this.updatePlayerCheckpoint(this.collisionService.isPlayerInCheckpoint(this.playerCollisionBottom - this.player.height * 2, this.playerCollisionX + 1, this.playerCollisionZ));
+                }
+                this.renderUpsertedGameEntities();
+            }
     }
 
     public updatePlayerCheckpoint(checkpointIndex: number): void {
@@ -156,20 +186,19 @@ export class LevelComponent implements OnInit {
             return true;
         } else if (this.playerFloorStatus === PlayerFloorStatus.nofloor) {
             this.player.lives -= 1;
-            if (this.player.lives === 0)
-            {
+            if (this.player.lives === 0) {
                 this.updatePlayerCheckpoint(0);
                 this.playerFloorStatusDebug = 'game over, reset';
-                alert("game over, reset");
+                alert('game over, reset');
                 this.player.lives = 3;
-                console.log(this.player, 'player');
-            }
-            else {
+                // console.log(this.player, 'player');
+            } else {
                 this.playerFloorStatusDebug = 'you just died, to checkpoint';
                 alert('you just died, to checkpoint');
             }
             this.player.x = this.player.checkpointX, this.player.y = this.player.checkpointY, this.player.z = this.player.checkpointZ;
             this.playerLivesDebug = this.player.lives;
+            this.playerRunning = false;
             return false;
         } else {
             return true;

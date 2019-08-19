@@ -57,7 +57,6 @@ export class CollisionService implements OnInit {
 
     public startCollisionDetectorArrayForObject(objToLoop: any, objectType: String): void {
         let collisionArray: number[][][] = this.safeFloors;
-        console.log(this.safeFloors.length);
         switch (objectType.toLowerCase()) {
             case 'checkpoint':
                 collisionArray = this.levelCheckpoints;
