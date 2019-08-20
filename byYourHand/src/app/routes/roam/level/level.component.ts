@@ -165,14 +165,22 @@ export class LevelComponent implements OnInit {
                 this.canvasService.clearCanvasForRedrawing(this.levelCanvas);
                 // need to redraw the canvas each time, which could loop on display objects, or just be rendered from the call each time?
                 if (this.isPlayerOnFloor()) {
-                    this.updatePlayerCheckpoint(this.collisionService.getCollisionObjectForGeneralCollisions(CollisionObjectType.checkpoint, this.playerCollisionBottom - this.player.height * 2, this.playerCollisionX + 1, this.playerCollisionZ).indexOfCollision);
+                    this.updatePlayerCheckpoint();
                 }
-                this.collisionService.getCollisionObjectForGeneralCollisions(CollisionObjectType.enemy, this.playerCollisionBottom - this.player.height * 2, this.playerCollisionX + 1, this.playerCollisionZ);
+                this.hurtPlayerIfHit();
                 this.renderUpsertedGameEntities();
             }
     }
 
-    public updatePlayerCheckpoint(checkpointIndex: number): void {
+    public hurtPlayerIfHit(): void {
+        const enemyIndex = this.collisionService.getCollisionObjectForGeneralCollisions(CollisionObjectType.enemy, this.playerCollisionBottom - this.player.height * 2, this.playerCollisionX + 1, this.playerCollisionZ).indexOfCollision;
+        if (enemyIndex >= 0) {
+            this.hurtPlayer(this.enemies[enemyIndex].damage);
+        }
+    }
+
+    public updatePlayerCheckpoint(restartCheckpoint?: boolean ): void {
+        const checkpointIndex = restartCheckpoint ? 0 : this.collisionService.getCollisionObjectForGeneralCollisions(CollisionObjectType.checkpoint, this.playerCollisionBottom - this.player.height * 2, this.playerCollisionX + 1, this.playerCollisionZ).indexOfCollision;
         if (checkpointIndex >= 0) {
             const matchedCheckpoint = this.checkpoints[checkpointIndex];
             this.player.checkpointX = this.checkpoints[checkpointIndex].x / 2;
@@ -181,26 +189,39 @@ export class LevelComponent implements OnInit {
         }
     }
 
+    public hurtPlayer(damage: number): void {
+        if (this.player.health - damage <= 0) {
+            this.killPlayer();
+        } else {
+            this.player.health -= damage;
+            this.playerHealthDebug = this.player.health;
+        }
+    }
+
+    public killPlayer(): void {
+        this.player.lives -= 1;
+        if (this.player.lives === 0) {
+            this.updatePlayerCheckpoint(true);
+            this.playerFloorStatusDebug = 'game over, reset';
+            alert('game over, reset');
+            this.player.lives = 3;
+            // console.log(this.player, 'player');
+        } else {
+            this.playerFloorStatusDebug = 'you just died, to checkpoint';
+            alert('you just died, to checkpoint');
+        }
+        this.player.x = this.player.checkpointX, this.player.y = this.player.checkpointY, this.player.z = this.player.checkpointZ;
+        this.playerLivesDebug = this.player.lives;
+        this.playerRunning = false;
+    }
+
     public isPlayerOnFloor(): boolean {
         this.playerFloorStatus = this.collisionService.getCurrentFloorStatusForObject(this.playerCollisionBottom, this.playerCollisionX, this.playerCollisionZ, this.player.width);
         this.playerFloorStatusDebug = this.playerFloorStatus;
         if (this.playerFloorStatus === PlayerFloorStatus.floorDown) {
             return true;
         } else if (this.playerFloorStatus === PlayerFloorStatus.nofloor) {
-            this.player.lives -= 1;
-            if (this.player.lives === 0) {
-                this.updatePlayerCheckpoint(0);
-                this.playerFloorStatusDebug = 'game over, reset';
-                alert('game over, reset');
-                this.player.lives = 3;
-                // console.log(this.player, 'player');
-            } else {
-                this.playerFloorStatusDebug = 'you just died, to checkpoint';
-                alert('you just died, to checkpoint');
-            }
-            this.player.x = this.player.checkpointX, this.player.y = this.player.checkpointY, this.player.z = this.player.checkpointZ;
-            this.playerLivesDebug = this.player.lives;
-            this.playerRunning = false;
+            this.killPlayer();
             return false;
         } else {
             return true;

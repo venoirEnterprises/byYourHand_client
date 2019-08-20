@@ -30,7 +30,7 @@ export class CollisionService implements OnInit {
         // const playerMatchedCheckpointY = this.playerCollisionBottom - this.player.height * 2;
         const objectCollisionIndex = this.returnCollisionArrayForObjectType(objectType)[y][x][z];
         if (objectCollisionIndex !== undefined && objectCollisionIndex >= 0) {
-            console.log(`I hit the ${objectType}: ${objectCollisionIndex}`);
+            // console.log(`I hit the ${objectType}: ${objectCollisionIndex}`);
             returnedCollision.indexOfCollision = objectCollisionIndex;
         } else {
             returnedCollision.indexOfCollision = -1;

@@ -37,7 +37,7 @@ export class RoamService {
 
     public getEnemies(): Enemy[] {
         this.enemies.push({
-            x: 7, y: 5, z: 3, width: 1, height: 1, depth: 1, fly: true, damage: 10, health: 100, moveY: 5, moveX: 0
+            x: 7, y: 5, z: 3, width: 1, height: 1, depth: 1, fly: true, damage: 40, health: 100, moveY: 5, moveX: 0
         });
         return this.enemies;
     }
