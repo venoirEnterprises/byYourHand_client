@@ -10,6 +10,7 @@ import { LevelService } from '../level.service';
 import { CanvasService } from '../canvas.service';
 import { LevelObject } from '../levelObject.dto';
 import { CollisionService } from '../collision.service';
+import { CollisionObjectType } from '../collisionObjectType.dto';
 
 @Component({
     selector: 'app-level',
@@ -70,8 +71,9 @@ export class LevelComponent implements OnInit {
 
         // floors begin
         // console.log(this.levelCheckpoints);
-        this.collisionService.startCollisionDetectorArrayForObject(this.floors, 'floor');
-        this.collisionService.startCollisionDetectorArrayForObject(this.checkpoints, 'checkpoint');
+        this.collisionService.startCollisionDetectorArrayForObject(this.floors, CollisionObjectType.floor);
+        this.collisionService.startCollisionDetectorArrayForObject(this.checkpoints, CollisionObjectType.checkpoint);
+        this.collisionService.startCollisionDetectorArrayForObject(this.enemies, CollisionObjectType.enemy);
 
         this.isPlayerOnFloor();
         this.renderUpsertedGameEntities();
@@ -86,7 +88,6 @@ export class LevelComponent implements OnInit {
             setTimeout(() => {
                 this.respondToKeyPress(ev);
                 this.playerRunning = this.playerKeyEnablesRunning(ev.keyCode);
-                console.log(`am I running? ${this.playerKeyEnablesRunning(ev.keyCode)}`);
                 this.player.activeKeys[ev.keyCode] = false;
             }, this.level.tickSpeed);
         } else if (this.currentlyHeldKeyCode !== ev.which) {
@@ -164,8 +165,9 @@ export class LevelComponent implements OnInit {
                 this.canvasService.clearCanvasForRedrawing(this.levelCanvas);
                 // need to redraw the canvas each time, which could loop on display objects, or just be rendered from the call each time?
                 if (this.isPlayerOnFloor()) {
-                    this.updatePlayerCheckpoint(this.collisionService.isPlayerInCheckpoint(this.playerCollisionBottom - this.player.height * 2, this.playerCollisionX + 1, this.playerCollisionZ));
+                    this.updatePlayerCheckpoint(this.collisionService.getCollisionObjectForGeneralCollisions(CollisionObjectType.checkpoint, this.playerCollisionBottom - this.player.height * 2, this.playerCollisionX + 1, this.playerCollisionZ).indexOfCollision);
                 }
+                this.collisionService.getCollisionObjectForGeneralCollisions(CollisionObjectType.enemy, this.playerCollisionBottom - this.player.height * 2, this.playerCollisionX + 1, this.playerCollisionZ);
                 this.renderUpsertedGameEntities();
             }
     }

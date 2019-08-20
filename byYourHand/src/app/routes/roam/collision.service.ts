@@ -1,6 +1,8 @@
 import { Injectable, OnInit } from '@angular/core';
 import { LevelService } from './level.service';
 import { PlayerFloorStatus } from './playerFloorStatus.dto';
+import { CollisionObjectType } from './collisionObjectType.dto';
+import { Collision } from './collision.dto';
 
 @Injectable({
     providedIn: 'root'
@@ -11,6 +13,7 @@ export class CollisionService implements OnInit {
 
     safeFloors: number[][][];
     levelCheckpoints: number[][][];
+    hurtingEnemies: number[][][];
 
     constructor() {
         this.levelService = new LevelService();
@@ -18,17 +21,21 @@ export class CollisionService implements OnInit {
     ngOnInit() {
         this.safeFloors = this.levelService.setUpLevelArray();
         this.levelCheckpoints = this.levelService.setUpLevelArray();
+        this.hurtingEnemies = this.levelService.setUpLevelArray();
     }
 
-    public isPlayerInCheckpoint(y: number, x: number, z: number): number {
+    public getCollisionObjectForGeneralCollisions(objectType: CollisionObjectType, y: number, x: number, z: number): Collision {
+        const returnedCollision: Collision = new Collision();
+        returnedCollision.collisionObject = objectType;
         // const playerMatchedCheckpointY = this.playerCollisionBottom - this.player.height * 2;
-        const checkpointCollided = this.levelCheckpoints[y][x][z]; // [this.playerCollisionX + 1][this.playerCollisionZ];
-        // console.log(`I hit the checkpoint: ${checkpointCollided}`)
-        if (checkpointCollided !== undefined && checkpointCollided >= 0) {
-            // this.updatePlayerCheckpoint(checkpointCollided);
-            return checkpointCollided;
+        const objectCollisionIndex = this.returnCollisionArrayForObjectType(objectType)[y][x][z];
+        if (objectCollisionIndex !== undefined && objectCollisionIndex >= 0) {
+            console.log(`I hit the ${objectType}: ${objectCollisionIndex}`);
+            returnedCollision.indexOfCollision = objectCollisionIndex;
+        } else {
+            returnedCollision.indexOfCollision = -1;
         }
-        return -1;
+        return returnedCollision;
     }
 
     public getCurrentFloorStatusForObject(y: number, x: number, z: number, objWidth: number): PlayerFloorStatus {
@@ -55,15 +62,21 @@ export class CollisionService implements OnInit {
         return playerFloorStatus;
     }
 
-    public startCollisionDetectorArrayForObject(objToLoop: any, objectType: String): void {
-        let collisionArray: number[][][] = this.safeFloors;
-        switch (objectType.toLowerCase()) {
-            case 'checkpoint':
-                collisionArray = this.levelCheckpoints;
-                break;
+    public returnCollisionArrayForObjectType(objectType: CollisionObjectType): number[][][] {
+        switch (objectType) {
+            case CollisionObjectType.checkpoint:
+                return this.levelCheckpoints;
+            case CollisionObjectType.enemy:
+                return this.hurtingEnemies;
+            default:
+                return this.safeFloors;
         }
-        for (var i = 0; i < objToLoop.length; i++) {
-            let collisionObject = objToLoop[i];
+    }
+
+    public startCollisionDetectorArrayForObject(objToLoop: any, objectType: CollisionObjectType): void {
+        const collisionArray: number[][][] = this.returnCollisionArrayForObjectType(objectType);
+        for (let i = 0; i < objToLoop.length; i++) {
+            const collisionObject = objToLoop[i];
             collisionObject.width *= 2;
             collisionObject.height *= 2;
             collisionObject.x *= 2;

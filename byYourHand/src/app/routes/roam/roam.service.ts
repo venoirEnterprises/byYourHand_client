@@ -17,13 +17,6 @@ export class RoamService {
     checkpoints: LevelObject[] = [];
     constructor() { }
 
-    public getEnemies(): Enemy[] {
-        this.enemies.push({
-            x: 5, y: 3, z: 0, width: 1, height: 1, depth: .5, fly: true, damage: 10, health: 100, moveY: 5, moveX: 0
-        });
-        return this.enemies;
-    }
-
     public getFloors(): Floor[] {
 
         // You must go from lowest y lowest x up to max x for that y, and up from there [canvas starts from 0, 0 in top left corner]
@@ -40,6 +33,13 @@ export class RoamService {
             leftBoundary: 0.5, rightBoundary: 61, tickSpeed: 50
         };
         return this.level;
+    }
+
+    public getEnemies(): Enemy[] {
+        this.enemies.push({
+            x: 7, y: 5, z: 3, width: 1, height: 1, depth: 1, fly: true, damage: 10, health: 100, moveY: 5, moveX: 0
+        });
+        return this.enemies;
     }
 
     public getCheckpoints(): LevelObject[] {

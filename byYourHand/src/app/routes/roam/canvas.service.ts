@@ -108,7 +108,7 @@ export class CanvasService {
     }
 
     public displayGameObject(obj: any, type: String, playerX: number, playerY: number): void {
-        const halfPxDetection = type.toLowerCase() === 'floor' || type.toLowerCase() === 'checkpoint';
+        const halfPxDetection = type.toLowerCase() !== 'player';
         const xModifier = halfPxDetection ? obj.x - 0.5 : obj.x;
         const widthModifier = halfPxDetection ? obj.width + 1 : obj.width;
         // Visual display of overhang as in setSafeFloorsForLevel
