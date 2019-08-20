@@ -23,8 +23,8 @@ export class LevelComponent implements OnInit {
 
     playerFloorStatusDebug: String;
     directionDebug: String = '';
-    playerLivesDebug: number;
-    playerHealthDebug: number;
+    playerLivesDebug: String;
+    playerHealthDebug: String;
     // Debug end
     playerFloorStatus: PlayerFloorStatus = PlayerFloorStatus.floorSafe;
     // Run-time player status compared to the floor
@@ -66,8 +66,8 @@ export class LevelComponent implements OnInit {
         this.player = this.roamService.getPlayer(this.checkpoints[0].x, this.checkpoints[0].y, this.checkpoints[0].z - (this.checkpoints[0].z / 2));
         // console.log(this.player, 'player');
         this.updatePlayerCoordinates();
-        this.playerHealthDebug = this.player.health;
-        this.playerLivesDebug = this.player.lives;
+        this.playerHealthDebug = this.player.health + '/' + this.player.restartHealth;
+        this.playerLivesDebug = this.player.lives + '/' + this.player.gameOverLives;
 
         // floors begin
         // console.log(this.levelCheckpoints);
@@ -194,24 +194,26 @@ export class LevelComponent implements OnInit {
             this.killPlayer();
         } else {
             this.player.health -= damage;
-            this.playerHealthDebug = this.player.health;
+            this.playerHealthDebug = this.player.health + '/' + this.player.restartHealth;
         }
     }
 
     public killPlayer(): void {
         this.player.lives -= 1;
+        this.player.health = this.player.restartHealth;
         if (this.player.lives === 0) {
             this.updatePlayerCheckpoint(true);
             this.playerFloorStatusDebug = 'game over, reset';
             alert('game over, reset');
-            this.player.lives = 3;
+            this.player.lives = this.player.gameOverLives;
             // console.log(this.player, 'player');
         } else {
-            this.playerFloorStatusDebug = 'you just died, to checkpoint';
+            this.playerFloorStatusDebug = 'death, reset';
             alert('you just died, to checkpoint');
         }
         this.player.x = this.player.checkpointX, this.player.y = this.player.checkpointY, this.player.z = this.player.checkpointZ;
-        this.playerLivesDebug = this.player.lives;
+        this.playerLivesDebug = this.player.lives + '/' + this.player.gameOverLives;
+        this.playerHealthDebug = this.player.health + '/' + this.player.restartHealth;
         this.playerRunning = false;
     }
 
