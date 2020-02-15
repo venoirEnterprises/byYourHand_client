@@ -11,6 +11,7 @@ import { CanvasService } from '../canvas.service';
 import { LevelObject } from '../levelObject.dto';
 import { CollisionService } from '../collision.service';
 import { CollisionObjectType } from '../collisionObjectType.dto';
+import { PlayerService } from '../player.service';
 
 @Component({
     selector: 'app-level',
@@ -36,6 +37,7 @@ export class LevelComponent implements OnInit {
     levelService: LevelService;
     canvasService: CanvasService;
     collisionService: CollisionService;
+    playerService: PlayerService;
 
     levelCanvas: HTMLCanvasElement;
     level: Level;
@@ -43,19 +45,15 @@ export class LevelComponent implements OnInit {
     currentlyHeldKeyCode = 0;
     playerRunning = false;
 
-    playerCollisionBottom: number;
-    playerCollisionX: number;
-    playerCollisionZ: number;
-
     constructor() {
         this.roamService = new RoamService();
         this.levelService = new LevelService();
         this.canvasService = new CanvasService();
         this.collisionService = new CollisionService();
+        this.playerService = new PlayerService();
     }
 
     ngOnInit() {
-        this.collisionService.ngOnInit();
         this.levelCanvas = this.canvas.nativeElement;
         this.canvasService.initMap(this.levelCanvas);
         // set up logical objects for later animations / collision detection
@@ -63,9 +61,10 @@ export class LevelComponent implements OnInit {
         this.floors = this.roamService.getFloors();
         this.level = this.roamService.getLevel();
         this.checkpoints = this.roamService.getCheckpoints();
-        this.player = this.roamService.getPlayer(this.checkpoints[0].x, this.checkpoints[0].y, this.checkpoints[0].z - (this.checkpoints[0].z / 2));
+        this.playerService.spawnPlayer(this.checkpoints[0].x, this.checkpoints[0].y, this.checkpoints[0].z - (this.checkpoints[0].z / 2));
+        this.getPlayerFromService();
         // console.log(this.player, 'player');
-        this.updatePlayerCoordinates();
+        this.playerService.updatePlayerCoordinates();
         this.playerHealthDebug = this.player.health + '/' + this.player.restartHealth;
         this.playerLivesDebug = this.player.lives + '/' + this.player.gameOverLives;
 
@@ -74,13 +73,13 @@ export class LevelComponent implements OnInit {
         this.collisionService.startCollisionDetectorArrayForObject(this.floors, CollisionObjectType.floor);
         this.collisionService.startCollisionDetectorArrayForObject(this.checkpoints, CollisionObjectType.checkpoint);
         this.collisionService.startCollisionDetectorArrayForObject(this.enemies, CollisionObjectType.enemy);
-
         this.isPlayerOnFloor();
         this.renderUpsertedGameEntities();
     }
 
     @HostListener('document:keydown', ['$event'])
     onKeyDown(ev: KeyboardEvent) {
+        this.getPlayerFromService();
         if (!this.player.activeKeys[ev.keyCode]) {
             this.player.activeKeys[ev.keyCode] = true;
             this.currentlyHeldKeyCode = ev.which;
@@ -100,22 +99,18 @@ export class LevelComponent implements OnInit {
 
     @HostListener('document:keyup', ['$event'])
     onKeyUp(ev: KeyboardEvent) {
+        this.getPlayerFromService();
         this.player.activeKeys[ev.keyCode] = false;
         this.playerRunning = this.playerKeyEnablesRunning(ev.keyCode);
         // this.respondToKeyPress(ev);
     }
 
     public playerKeyEnablesRunning(keyCode: number): boolean {
+        this.getPlayerFromService();
         return this.player.activeKeys[this.player.keyMoveLeft] === true
             || this.player.activeKeys[this.player.keyMoveUp] === true
             || this.player.activeKeys[this.player.keyMoveRight] === true
             || this.player.activeKeys[this.player.keyMoveDown] === true;
-    }
-
-    public updatePlayerCoordinates(): void {
-        this.playerCollisionBottom = (this.player.y + this.player.height) * 2;
-        this.playerCollisionX = this.player.x * 2;
-        this.playerCollisionZ = this.player.z * 2;
     }
 
     public renderUpsertedGameEntities(): void {
@@ -130,6 +125,7 @@ export class LevelComponent implements OnInit {
     }
 
     public respondToKeyPress(ev: KeyboardEvent, ): void {
+        this.getPlayerFromService();
         let activeKeyPressed = true;
         const playerMovement = this.playerRunning ? 1 : .5;
             switch (ev.keyCode) {
@@ -161,26 +157,23 @@ export class LevelComponent implements OnInit {
                     break;
             }
             if (activeKeyPressed) {
-                this.updatePlayerCoordinates();
+                this.playerService.updatePlayerCoordinates();
                 this.canvasService.clearCanvasForRedrawing(this.levelCanvas);
                 // need to redraw the canvas each time, which could loop on display objects, or just be rendered from the call each time?
                 if (this.isPlayerOnFloor()) {
                     this.updatePlayerCheckpoint();
                 }
-                this.hurtPlayerIfHit();
+                const potentialDamage = this.playerService.playerDamageFromObject(CollisionObjectType.enemy);
+                if (potentialDamage > 0) {
+                    this.hurtPlayer(potentialDamage);
+                };
                 this.renderUpsertedGameEntities();
             }
     }
 
-    public hurtPlayerIfHit(): void {
-        const enemyIndex = this.collisionService.getCollisionObjectForGeneralCollisions(CollisionObjectType.enemy, this.playerCollisionBottom - this.player.height * 2, this.playerCollisionX + 1, this.playerCollisionZ).indexOfCollision;
-        if (enemyIndex >= 0) {
-            this.hurtPlayer(this.enemies[enemyIndex].damage);
-        }
-    }
-
-    public updatePlayerCheckpoint(restartCheckpoint?: boolean ): void {
-        const checkpointIndex = restartCheckpoint ? 0 : this.collisionService.getCollisionObjectForGeneralCollisions(CollisionObjectType.checkpoint, this.playerCollisionBottom - this.player.height * 2, this.playerCollisionX + 1, this.playerCollisionZ).indexOfCollision;
+    public updatePlayerCheckpoint(restartCheckpoint?: boolean): void {
+        this.getPlayerFromService();
+        const checkpointIndex = restartCheckpoint ? 0 : this.collisionService.getCollisionObjectForGeneralCollisions(CollisionObjectType.checkpoint, this.player.collisionY - this.player.height * 2, this.player.collisionX + 1, this.player.collisionZ).indexOfCollision;
         if (checkpointIndex >= 0) {
             const matchedCheckpoint = this.checkpoints[checkpointIndex];
             this.player.checkpointX = this.checkpoints[checkpointIndex].x / 2;
@@ -190,6 +183,7 @@ export class LevelComponent implements OnInit {
     }
 
     public hurtPlayer(damage: number): void {
+        console.log('vnorris-damage', damage, this.player);
         if (this.player.health - damage <= 0) {
             this.killPlayer();
         } else {
@@ -218,7 +212,8 @@ export class LevelComponent implements OnInit {
     }
 
     public isPlayerOnFloor(): boolean {
-        this.playerFloorStatus = this.collisionService.getCurrentFloorStatusForObject(this.playerCollisionBottom, this.playerCollisionX, this.playerCollisionZ, this.player.width);
+        this.getPlayerFromService();
+        this.playerFloorStatus = this.collisionService.getCurrentFloorStatusForObject(this.player.collisionY, this.player.collisionX, this.player.collisionZ, this.player.width);
         this.playerFloorStatusDebug = this.playerFloorStatus;
         if (this.playerFloorStatus === PlayerFloorStatus.floorDown) {
             return true;
@@ -228,5 +223,9 @@ export class LevelComponent implements OnInit {
         } else {
             return true;
         }
+    }
+
+    public getPlayerFromService() {
+        this.player = this.playerService.getPlayer();
     }
 }

@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Enemy } from './enemy.dto';
 import { Floor } from './floor.dto';
-import { Player } from './level/player.dto';
 import { Level } from './level.dto';
 import { LevelObject } from './levelObject.dto';
 
@@ -13,7 +12,6 @@ export class RoamService {
     enemies: Enemy[] = [];
     floors: Floor[] = [];
     level: Level;
-    player: Player;
     checkpoints: LevelObject[] = [];
     constructor() { }
 
@@ -30,7 +28,7 @@ export class RoamService {
 
     public getLevel(): Level {
         this.level = {
-            leftBoundary: 0.5, rightBoundary: 61, tickSpeed: 50
+            leftBoundary: 0.5, rightBoundary: 61, topBoundary: 0.5, bottomBoundary: 50, tickSpeed: 50
         };
         return this.level;
     }
@@ -46,16 +44,5 @@ export class RoamService {
         this.checkpoints.push({ x: 2, y: 5, z: 1, width: 1, depth: 1, height: 0 });
         this.checkpoints.push({ x: 19, y: 5, z: 1, width: 1, depth: 1, height: 0 });
         return this.checkpoints;
-    }
-
-    public getPlayer(levelStartX: number, levelStartY: number, levelStartZ: number): Player {
-        this.player = {
-            x: levelStartX, y: levelStartY, z: levelStartZ, width: 1, height: 1, depth: 0.5, keyMoveLeft: 65, keyMoveUp: 87, keyMoveDown: 83, keyMoveRight: 68, name: 'firstPlayer', health: 100, restartHealth: 100, lives: 3, gameOverLives: 3, movePerPress: 1, builder: false, checkpointX: levelStartX, checkpointY: levelStartY, checkpointZ: levelStartZ, activeKeys: []
-        };
-        this.player.activeKeys[this.player.keyMoveLeft] = false;
-        this.player.activeKeys[this.player.keyMoveUp] = false;
-        this.player.activeKeys[this.player.keyMoveDown] = false;
-        this.player.activeKeys[this.player.keyMoveRight] = false;
-        return this.player;
     }
 }

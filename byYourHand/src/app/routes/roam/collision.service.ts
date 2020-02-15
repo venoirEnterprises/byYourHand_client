@@ -7,7 +7,7 @@ import { Collision } from './collision.dto';
 @Injectable({
     providedIn: 'root'
 })
-export class CollisionService implements OnInit {
+export class CollisionService {
 
     levelService: LevelService;
 
@@ -17,8 +17,6 @@ export class CollisionService implements OnInit {
 
     constructor() {
         this.levelService = new LevelService();
-    }
-    ngOnInit() {
         this.safeFloors = this.levelService.setUpLevelArray();
         this.levelCheckpoints = this.levelService.setUpLevelArray();
         this.hurtingEnemies = this.levelService.setUpLevelArray();

@@ -17,5 +17,8 @@ export class Player extends LevelObject {
     checkpointX: number;
     checkpointY: number;
     checkpointZ: number;
-    // When you die, this is where you go
+    // When you die, the checkpoints coordinates are where you go. Reset goes to checkpoint[0]
+    collisionY: number;
+    collisionX: number;
+    collisionZ: number;
 }
