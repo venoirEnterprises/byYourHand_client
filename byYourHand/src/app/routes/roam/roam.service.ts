@@ -18,11 +18,11 @@ export class RoamService {
     public getFloors(): Floor[] {
 
         // You must go from lowest y lowest x up to max x for that y, and up from there [canvas starts from 0, 0 in top left corner]
-        this.floors.push({ x: 26, y: 11, z: 0, width: 2, height: 5, depth: 2, breakable: false, falling: false });
+        // this.floors.push({ x: 26, y: 11, z: 0, width: 2, height: 5, depth: 2, breakable: false, falling: false });
         this.floors.push({ x: 1, y: 6, z: 0, width: 4, height: 1, depth: 14, breakable: false, falling: false });
         this.floors.push({ x: 5, y: 6, z: 3, width: 14, height: 1, depth: 1, breakable: false, falling: false });
         this.floors.push({ x: 19, y: 6, z: 0, width: 2, height: 1, depth: 4, breakable: false, falling: false });
-        this.floors.push({ x: 26, y: 6, z: 0, width: 4, height: 1, depth: 2, breakable: false, falling: false });
+        // this.floors.push({ x: 26, y: 6, z: 0, width: 4, height: 1, depth: 2, breakable: false, falling: false });
         return this.floors;
     }
 

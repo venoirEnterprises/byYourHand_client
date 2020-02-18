@@ -1,4 +1,5 @@
 import { LevelObject } from '../levelObject.dto';
+import { PlayerFloorStatus } from '../playerFloorStatus.dto';
 
 export class Player extends LevelObject {
     keyMoveLeft: number;
@@ -13,6 +14,7 @@ export class Player extends LevelObject {
     lives: number;
     gameOverLives: number;
     movePerPress: number; // if held, on click, or how far they move [*32] when pressing a direction. Tied to a tick in the end
+    isRunning: boolean;
     builder: boolean;
     checkpointX: number;
     checkpointY: number;
@@ -21,4 +23,6 @@ export class Player extends LevelObject {
     collisionY: number;
     collisionX: number;
     collisionZ: number;
+    playerFloorStatus: PlayerFloorStatus = PlayerFloorStatus.floorSafe;
+    playerFloorStatusDebug: PlayerFloorStatus = PlayerFloorStatus.floorSafe;
 }

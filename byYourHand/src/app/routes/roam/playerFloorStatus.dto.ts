@@ -3,5 +3,7 @@ export enum PlayerFloorStatus {
     floorDown = 'floorDownonY',
     floorRightEdge = 'floorRightEdge',
     floorLeftEdge = 'floorLeftEdge',
-    floorSafe = 'floorSafe'
+    floorSafe = 'floorSafe',
+    gameOver = 'game over, reset',
+    dead = 'death, reset'
 }

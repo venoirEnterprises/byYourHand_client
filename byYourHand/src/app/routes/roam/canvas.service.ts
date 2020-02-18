@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { DisplayLevelObject } from './displayLevelObject.dto';
+import { Level } from './level.dto';
 
 @Injectable({
     providedIn: 'root'
@@ -31,23 +32,25 @@ export class CanvasService {
 
     public pushLogicalGameObjectToCanvasDisplay(obj: any, type: String, playerX: number, playerY: number): void {
         this.cx.lineWidth = 3;
-        // console.log(type, obj);
         const leftEdgeX = obj.x;
-        const bottomEdgeY = obj.y - obj.z;
         const rightEdgeX = obj.x + obj.width;
-        const topEdgeY = obj.y - obj.height - obj.z;
+        const topEdgeY = (obj.y - obj.height - obj.z);
+        const bottomEdgeY = (obj.y - obj.z);
+
+        if (obj.type === 'player') {
+            console.log(obj);
+        }
+
         // this.horizonY = topEdgeY - 400;
-        this.horizonY = playerY - 500;
+        // this.horizonY = playerY - 25000;
         // this.horizonX = playerX + 8;
         const halfYPoint = this.horizonX;
         const showRightSideOfCube = rightEdgeX <= halfYPoint + obj.z;
-        const bottomCornerForDepthDisplay = showRightSideOfCube ? rightEdgeX + obj.z : leftEdgeX - obj.z;
-        const topCornerForDepthDisplay = !showRightSideOfCube ? rightEdgeX - obj.z : leftEdgeX + obj.z;
+        const bottomCornerForDepthDisplay = showRightSideOfCube ? rightEdgeX : leftEdgeX;
+        const topCornerForDepthDisplay = !showRightSideOfCube ? rightEdgeX : leftEdgeX;
 
-        // console.log(`my horizon is ${this.horizonX} and ${this.horizonY}`)
-        // console.log(obj, type);
         // var diffBackPerPixelLeftBottomSide = (this.horizonX - leftEdgeX) / (this.horizonY - bottomEdgeY);
-        const angleForObjectDepthDisplay = (this.horizonX - rightEdgeX) / (this.horizonY - bottomEdgeY);
+        const angleForObjectDepthDisplay = 0;
         // var diffBackPerPixelLeftTopSide = (this.horizonX - leftEdgeX) / (this.horizonY - topEdgeY);
         // var diffBackPerPixelRightTopSide = (this.horizonX - rightEdgeX) / (this.horizonY - topEdgeY);
         const displayDepth = obj.depth;
@@ -109,8 +112,8 @@ export class CanvasService {
 
     public displayGameObject(obj: any, type: String, playerX: number, playerY: number): void {
         const halfPxDetection = type.toLowerCase() !== 'player';
-        const xModifier = halfPxDetection ? obj.x - 0.5 : obj.x;
-        const widthModifier = halfPxDetection ? obj.width + 1 : obj.width;
+        const xModifier = obj.x; // halfPxDetection ? obj.x - 0.5 : obj.x;
+        const widthModifier = obj.width; // halfPxDetection ? obj.width + 1 : obj.width;
         // Visual display of overhang as in setSafeFloorsForLevel
         const gameObject = ({
             x: this.convertDBValueToDisplayValue(xModifier, halfPxDetection),
@@ -119,7 +122,8 @@ export class CanvasService {
             depth: this.convertDBValueToDisplayValue(obj.depth, halfPxDetection),
             width: this.convertDBValueToDisplayValue(widthModifier, halfPxDetection),
             height: this.convertDBValueToDisplayValue(obj.height, halfPxDetection),
-            id: obj.id
+            id: obj.id,
+            type: type
         });
         // console.log(gameObject);
         this.pushLogicalGameObjectToCanvasDisplay(gameObject, type, playerX, playerY);

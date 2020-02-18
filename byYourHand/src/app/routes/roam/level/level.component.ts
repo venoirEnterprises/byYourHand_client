@@ -27,7 +27,6 @@ export class LevelComponent implements OnInit {
     playerLivesDebug: String;
     playerHealthDebug: String;
     // Debug end
-    playerFloorStatus: PlayerFloorStatus = PlayerFloorStatus.floorSafe;
     // Run-time player status compared to the floor
     enemies: Enemy[] = [];
     floors: Floor[] = [];
@@ -43,7 +42,6 @@ export class LevelComponent implements OnInit {
     level: Level;
     player: Player;
     currentlyHeldKeyCode = 0;
-    playerRunning = false;
 
     constructor() {
         this.roamService = new RoamService();
@@ -61,19 +59,16 @@ export class LevelComponent implements OnInit {
         this.floors = this.roamService.getFloors();
         this.level = this.roamService.getLevel();
         this.checkpoints = this.roamService.getCheckpoints();
-        this.playerService.spawnPlayer(this.checkpoints[0].x, this.checkpoints[0].y, this.checkpoints[0].z - (this.checkpoints[0].z / 2));
+        this.playerService.spawnPlayer(this.checkpoints);
         this.getPlayerFromService();
         // console.log(this.player, 'player');
-        this.playerService.updatePlayerCoordinates();
-        this.playerHealthDebug = this.player.health + '/' + this.player.restartHealth;
-        this.playerLivesDebug = this.player.lives + '/' + this.player.gameOverLives;
+        this.getDebugPlayerInfo();
 
         // floors begin
         // console.log(this.levelCheckpoints);
         this.collisionService.startCollisionDetectorArrayForObject(this.floors, CollisionObjectType.floor);
         this.collisionService.startCollisionDetectorArrayForObject(this.checkpoints, CollisionObjectType.checkpoint);
         this.collisionService.startCollisionDetectorArrayForObject(this.enemies, CollisionObjectType.enemy);
-        this.isPlayerOnFloor();
         this.renderUpsertedGameEntities();
     }
 
@@ -86,22 +81,23 @@ export class LevelComponent implements OnInit {
             // The key is held down, I don't want to overwhelm the system with that key press, wait a "tick" until kicking the action off again
             setTimeout(() => {
                 this.respondToKeyPress(ev);
-                this.playerRunning = this.playerKeyEnablesRunning(ev.keyCode);
+                this.playerService.setPlayerRunningStatus(this.playerKeyEnablesRunning(ev.keyCode));
                 this.player.activeKeys[ev.keyCode] = false;
             }, this.level.tickSpeed);
         } else if (this.currentlyHeldKeyCode !== ev.which) {
-            this.playerRunning = false;
+            this.playerService.setPlayerRunningStatus(false);
             this.player.activeKeys[ev.keyCode] = false;
         } else {
             return false;
         }
+
     }
 
     @HostListener('document:keyup', ['$event'])
     onKeyUp(ev: KeyboardEvent) {
         this.getPlayerFromService();
         this.player.activeKeys[ev.keyCode] = false;
-        this.playerRunning = this.playerKeyEnablesRunning(ev.keyCode);
+        this.playerService.setPlayerRunningStatus(this.playerKeyEnablesRunning(ev.keyCode));
         // this.respondToKeyPress(ev);
     }
 
@@ -127,7 +123,7 @@ export class LevelComponent implements OnInit {
     public respondToKeyPress(ev: KeyboardEvent, ): void {
         this.getPlayerFromService();
         let activeKeyPressed = true;
-        const playerMovement = this.playerRunning ? 1 : .5;
+        const playerMovement = this.player.isRunning ? 1 : .5;
             switch (ev.keyCode) {
                 case this.player.keyMoveLeft:
                     if (this.player.x > this.level.leftBoundary) {
@@ -160,72 +156,26 @@ export class LevelComponent implements OnInit {
                 this.playerService.updatePlayerCoordinates();
                 this.canvasService.clearCanvasForRedrawing(this.levelCanvas);
                 // need to redraw the canvas each time, which could loop on display objects, or just be rendered from the call each time?
-                if (this.isPlayerOnFloor()) {
-                    this.updatePlayerCheckpoint();
+                if (this.playerService.isPlayerOnFloor()) {
+                    this.playerService.updatePlayerCheckpoint();
                 }
                 const potentialDamage = this.playerService.playerDamageFromObject(CollisionObjectType.enemy);
                 if (potentialDamage > 0) {
-                    this.hurtPlayer(potentialDamage);
-                };
+                    this.playerService.hurtPlayer(potentialDamage);
+                }
                 this.renderUpsertedGameEntities();
+                this.getDebugPlayerInfo();
             }
-    }
-
-    public updatePlayerCheckpoint(restartCheckpoint?: boolean): void {
-        this.getPlayerFromService();
-        const checkpointIndex = restartCheckpoint ? 0 : this.collisionService.getCollisionObjectForGeneralCollisions(CollisionObjectType.checkpoint, this.player.collisionY - this.player.height * 2, this.player.collisionX + 1, this.player.collisionZ).indexOfCollision;
-        if (checkpointIndex >= 0) {
-            const matchedCheckpoint = this.checkpoints[checkpointIndex];
-            this.player.checkpointX = this.checkpoints[checkpointIndex].x / 2;
-            this.player.checkpointY = this.checkpoints[checkpointIndex].y / 2;
-            this.player.checkpointZ = this.checkpoints[checkpointIndex].z - (matchedCheckpoint.depth / 2);
-        }
-    }
-
-    public hurtPlayer(damage: number): void {
-        console.log('vnorris-damage', damage, this.player);
-        if (this.player.health - damage <= 0) {
-            this.killPlayer();
-        } else {
-            this.player.health -= damage;
-            this.playerHealthDebug = this.player.health + '/' + this.player.restartHealth;
-        }
-    }
-
-    public killPlayer(): void {
-        this.player.lives -= 1;
-        this.player.health = this.player.restartHealth;
-        if (this.player.lives === 0) {
-            this.updatePlayerCheckpoint(true);
-            this.playerFloorStatusDebug = 'game over, reset';
-            alert('game over, reset');
-            this.player.lives = this.player.gameOverLives;
-            // console.log(this.player, 'player');
-        } else {
-            this.playerFloorStatusDebug = 'death, reset';
-            alert('you just died, to checkpoint');
-        }
-        this.player.x = this.player.checkpointX, this.player.y = this.player.checkpointY, this.player.z = this.player.checkpointZ;
-        this.playerLivesDebug = this.player.lives + '/' + this.player.gameOverLives;
-        this.playerHealthDebug = this.player.health + '/' + this.player.restartHealth;
-        this.playerRunning = false;
-    }
-
-    public isPlayerOnFloor(): boolean {
-        this.getPlayerFromService();
-        this.playerFloorStatus = this.collisionService.getCurrentFloorStatusForObject(this.player.collisionY, this.player.collisionX, this.player.collisionZ, this.player.width);
-        this.playerFloorStatusDebug = this.playerFloorStatus;
-        if (this.playerFloorStatus === PlayerFloorStatus.floorDown) {
-            return true;
-        } else if (this.playerFloorStatus === PlayerFloorStatus.nofloor) {
-            this.killPlayer();
-            return false;
-        } else {
-            return true;
-        }
     }
 
     public getPlayerFromService() {
         this.player = this.playerService.getPlayer();
+    }
+
+    public getDebugPlayerInfo() {
+        this.getPlayerFromService();
+        this.playerFloorStatusDebug = this.player.playerFloorStatusDebug;
+        this.playerLivesDebug = this.player.lives + '/' + this.player.gameOverLives;
+        this.playerHealthDebug = this.player.health + '/' + this.player.restartHealth;
     }
 }
